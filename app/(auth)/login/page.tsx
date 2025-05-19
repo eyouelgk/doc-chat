@@ -2,14 +2,14 @@
 
 import { useActionState } from "react"
 import { useRouter } from "next/navigation"
-import { Button } from "../components/ui/button"
+import { Button } from "@/app/components/ui/button"
 import {
   Form,
   FormGroup,
   FormLabel,
   FormInput,
   FormError,
-} from "../components/ui/Form"
+} from "@/app/components/ui/Form"
 import Link from "next/link"
 import toast from "react-hot-toast"
 import { signIn, ActionResponse } from "@/app/actions/auth"

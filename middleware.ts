@@ -2,7 +2,7 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 export function middleware(request: NextRequest) {
-  const token = request.cookies.get("token")?.value
+  const token = request.cookies.get("auth_token")?.value
 
   // Protect the /dashboard, /chat, and /user-profile routes
   const protectedPaths = ["/dashboard", "/chat", "/user-profile"]
