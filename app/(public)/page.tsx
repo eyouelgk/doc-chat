@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-
+// import { UploadButton } from "@/lib/uploadthing"
 export default function Home() {
   return (
     <div>
@@ -10,6 +10,7 @@ export default function Home() {
       <br />
       <Link href="/signup">Sign Up</Link>
       <br />
+      <Link href="/dashboard">Dashboard</Link>
     </div>
   )
 }

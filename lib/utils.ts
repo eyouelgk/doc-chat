@@ -4,3 +4,24 @@ import { twMerge } from "tailwind-merge"
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
 }
+
+export function formatRelativeTime(date: Date): React.ReactNode {
+  const now = new Date()
+  const diff = Math.floor((now.getTime() - date.getTime()) / 1000)
+
+  if (diff < 60) return "just now"
+  if (diff < 3600) {
+    const mins = Math.floor(diff / 60)
+    return `${mins} minute${mins !== 1 ? "s" : ""} ago`
+  }
+  if (diff < 86400) {
+    const hours = Math.floor(diff / 3600)
+    return `${hours} hour${hours !== 1 ? "s" : ""} ago`
+  }
+  if (diff < 604800) {
+    const days = Math.floor(diff / 86400)
+    return `${days} day${days !== 1 ? "s" : ""} ago`
+  }
+  // fallback to date string
+  return date.toLocaleDateString()
+}

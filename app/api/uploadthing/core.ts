@@ -1,11 +1,9 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next"
 import { UploadThingError } from "uploadthing/server"
 import { createDocument } from "../../../lib/upload"
-import { uuid } from "drizzle-orm/pg-core"
+import { getCurrentUser } from "@/lib/data-access"
 
 const f = createUploadthing()
-const userId = uuid() // Fake user ID for demonstration
-const auth = (req: Request) => ({ id: `${userId}` })
 
 export const ourFileRouter = {
   fileUploader: f({
@@ -15,7 +13,7 @@ export const ourFileRouter = {
     },
   })
     .middleware(async ({ req }) => {
-      const user = await auth(req)
+      const user = await getCurrentUser()
       if (!user) throw new UploadThingError("Unauthorized")
       return { userId: user.id }
     })

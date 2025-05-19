@@ -34,6 +34,15 @@ export const getUserByEmail = cache(async (email: string) => {
     return null
   }
 })
+export const getUserById = cache(async (id: string) => {
+  try {
+    const result = await db.select().from(users).where(eq(users.id, id))
+    return result[0] || null
+  } catch (error) {
+    console.error("Error getting user by ID:", error)
+    return null
+  }
+})
 export async function getConversation(id: string) {
   try {
     const result = await db.query.conversations.findFirst({

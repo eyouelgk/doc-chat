@@ -1,28 +1,11 @@
 "use client"
 
 import * as React from "react"
-import {
-  IconCamera,
-  IconChartBar,
-  IconDashboard,
-  IconDatabase,
-  IconFileAi,
-  IconFileDescription,
-  IconFileWord,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
-} from "@tabler/icons-react"
-
-import { NavDocuments } from "@/app/components/nav-documents"
+import { IconInnerShadowTop } from "@tabler/icons-react"
 import { NavMain } from "@/app/components/nav-main"
-import { NavSecondary } from "@/app/components/nav-secondary"
 import { NavUser } from "@/app/components/nav-user"
+import { useSession } from "next-auth/react"
+import { useEffect, useState } from "react"
 import {
   Sidebar,
   SidebarContent,
@@ -33,121 +16,46 @@ import {
   SidebarMenuItem,
 } from "@/app/components/ui/sidebar"
 
-const data = {
-  user: {
-    name: "shadcn",
-    email: "m@example.com",
-    avatar: "/avatars/shadcn.jpg",
-  },
-  navMain: [
-    {
-      title: "Dashboard",
-      url: "#",
-      icon: IconDashboard,
+function useUserData() {
+  const { data: session } = useSession()
+  type Document = {
+    id: string
+    createdAt: Date
+    updatedAt: Date
+    userId: string
+    fileName: string
+    filePath: string
+  }
+  const [documents, setDocuments] = useState<Document[]>([])
+
+  useEffect(() => {
+    async function fetchDocs() {
+      if (!session?.user?.email) return
+      try {
+        const response = await fetch(
+          `/api/documents?email=${session.user.email}`
+        )
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const data: Document[] = await response.json()
+        setDocuments(data)
+      } catch (error) {
+        console.error("Failed to fetch documents", error)
+      }
+    }
+    if (session?.user?.email) {
+      fetchDocs()
+    }
+  }, [session?.user?.email])
+
+  return {
+    user: {
+      name: session?.user?.name ?? "Guest",
+      email: session?.user?.email ?? "",
     },
-    {
-      title: "Lifecycle",
-      url: "#",
-      icon: IconListDetails,
-    },
-    {
-      title: "Analytics",
-      url: "#",
-      icon: IconChartBar,
-    },
-    {
-      title: "Projects",
-      url: "#",
-      icon: IconFolder,
-    },
-    {
-      title: "Team",
-      url: "#",
-      icon: IconUsers,
-    },
-  ],
-  navClouds: [
-    {
-      title: "Capture",
-      icon: IconCamera,
-      isActive: true,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Proposal",
-      icon: IconFileDescription,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-    {
-      title: "Prompts",
-      icon: IconFileAi,
-      url: "#",
-      items: [
-        {
-          title: "Active Proposals",
-          url: "#",
-        },
-        {
-          title: "Archived",
-          url: "#",
-        },
-      ],
-    },
-  ],
-  navSecondary: [
-    {
-      title: "Settings",
-      url: "#",
-      icon: IconSettings,
-    },
-    {
-      title: "Get Help",
-      url: "#",
-      icon: IconHelp,
-    },
-    {
-      title: "Search",
-      url: "#",
-      icon: IconSearch,
-    },
-  ],
-  documents: [
-    {
-      name: "Data Library",
-      url: "#",
-      icon: IconDatabase,
-    },
-    {
-      name: "Reports",
-      url: "#",
-      icon: IconReport,
-    },
-    {
-      name: "Word Assistant",
-      url: "#",
-      icon: IconFileWord,
-    },
-  ],
+    documents,
+  }
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -162,20 +70,25 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             >
               <a href="#">
                 <IconInnerShadowTop className="!size-5" />
-                <span className="text-base font-semibold">Acme Inc.</span>
+                <span className="text-base font-semibold">DocuChat</span>
               </a>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
-        <NavMain items={data.navMain} />
-        <NavDocuments items={data.documents} />
-        <NavSecondary items={data.navSecondary} className="mt-auto" />
-      </SidebarContent>
-      <SidebarFooter>
-        <NavUser user={data.user} />
-      </SidebarFooter>
+      {(() => {
+        const data = useUserData()
+        return (
+          <>
+            <SidebarContent>
+              <NavMain documents={data.documents} />
+            </SidebarContent>
+            <SidebarFooter>
+              <NavUser user={data.user} />
+            </SidebarFooter>
+          </>
+        )
+      })()}
     </Sidebar>
   )
 }

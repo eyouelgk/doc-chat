@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "../components/ui/button"
 import { Separator } from "@/app/components/ui/separator"
 import { SidebarTrigger } from "@/app/components/ui/sidebar"

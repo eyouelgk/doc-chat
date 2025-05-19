@@ -103,7 +103,6 @@ export async function shouldRefreshToken(token: string): Promise<boolean> {
 export async function createSession(userId: string) {
   try {
     const token = await generateJWT({ userId })
-
     const cookieStore = await cookies()
     cookieStore.set({
       name: "auth_token",

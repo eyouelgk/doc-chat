@@ -31,87 +31,49 @@ export const users = pgTable(
   }
 )
 
-export const documents = pgTable(
-  "documents",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    fileName: text("file_name").notNull(),
-    filePath: text("file_path").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (documents) => {
-    return {
-      userIdIdx: uniqueIndex("document_user_id_idx").on(documents.userId),
-    }
-  }
-)
+export const documents = pgTable("documents", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  fileName: text("file_name").notNull(),
+  filePath: text("file_path").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
 
-export const documentChunks = pgTable(
-  "document_chunks",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    documentId: uuid("document_id")
-      .notNull()
-      .references(() => documents.id, { onDelete: "cascade" }),
-    chunkText: text("chunk_text").notNull(),
-    chunkIndex: integer("chunk_index").notNull(),
-    embedding: vector("embeddings", { dimensions: 1536 }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (documentChunks) => {
-    return {
-      documentIdIdx: uniqueIndex("chunk_document_id_idx").on(
-        documentChunks.documentId
-      ),
-    }
-  }
-)
+export const documentChunks = pgTable("document_chunks", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  documentId: uuid("document_id")
+    .notNull()
+    .references(() => documents.id, { onDelete: "cascade" }),
+  chunkText: text("chunk_text").notNull(),
+  chunkIndex: integer("chunk_index").notNull(),
+  embedding: vector("embeddings", { dimensions: 1536 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
 
-export const conversations = pgTable(
-  "conversations",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    userId: uuid("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    documentId: uuid("document_id") // Optional: Link a conversation to a specific document
-      .references(() => documents.id, { onDelete: "set null" }),
-    title: varchar("title", { length: 255 }), // Optional: A title for the conversation
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (conversations) => {
-    return {
-      userIdIdx: uniqueIndex("conversation_user_id_idx").on(
-        conversations.userId
-      ),
-    }
-  }
-)
+export const conversations = pgTable("conversations", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  userId: uuid("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  documentId: uuid("document_id") // Optional: Link a conversation to a specific document
+    .references(() => documents.id, { onDelete: "set null" }),
+  title: varchar("title", { length: 255 }), // Optional: A title for the conversation
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
 
-export const messages = pgTable(
-  "messages",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    conversationId: uuid("conversation_id")
-      .notNull()
-      .references(() => conversations.id, { onDelete: "cascade" }),
-    role: messageRoleEnum("role").notNull(), // 'user' or 'assistant'
-    content: text("content").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (messages) => {
-    return {
-      conversationIdIdx: uniqueIndex("message_conversation_id_idx").on(
-        messages.conversationId
-      ),
-    }
-  }
-)
+export const messages = pgTable("messages", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  conversationId: uuid("conversation_id")
+    .notNull()
+    .references(() => conversations.id, { onDelete: "cascade" }),
+  role: messageRoleEnum("role").notNull(), // 'user' or 'assistant'
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+})
 
 // Define relations for easier querying (optional but recommended)
 export const usersRelations = relations(users, ({ many }) => ({

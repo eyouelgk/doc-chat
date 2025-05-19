@@ -83,6 +83,7 @@ export async function signIn(formData: FormData): Promise<ActionResponse> {
       }
     }
 
+    await deleteSession() // Ensure any existing session is deleted
     // Create session
     await createSession(user.id)
 
@@ -165,6 +166,6 @@ export async function signOut(): Promise<void> {
     console.error("Sign out error:", error)
     throw new Error("Failed to sign out")
   } finally {
-    redirect("/signin")
+    redirect("/login")
   }
 }
