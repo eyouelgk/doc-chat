@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm"
 import { getCurrentUser } from "@/lib/data-access"
 import { z } from "zod"
 import { revalidateTag } from "next/cache"
+import { chatWithDocument } from "@/lib/chat"
 // Define Zod schema for issue validation
 const ConversationSchema = z.object({
   title: z
@@ -136,5 +137,28 @@ export async function deleteConversation(id: string): Promise<ActionResponse> {
       message: "An error occurred while deleting the conversation",
       error: "Failed to delete conversation",
     }
+  }
+}
+
+export type ChatActionResponse = {
+  success: boolean
+  message?: string
+  aiResponse?: string
+  error?: string
+}
+
+export async function sendMessageToAI(
+  documentId: string,
+  message: string
+): Promise<ChatActionResponse> {
+  try {
+    if (!documentId || !message) {
+      return { success: false, error: "Missing document ID or message" }
+    }
+    const aiResponse = await chatWithDocument(documentId, message)
+    return { success: true, aiResponse }
+  } catch (error) {
+    console.error("AI chat error:", error)
+    return { success: false, error: "Failed to get AI response" }
   }
 }
