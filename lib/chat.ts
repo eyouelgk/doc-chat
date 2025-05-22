@@ -10,11 +10,10 @@ import { TaskType } from "@google/generative-ai"
 import { ChatPromptTemplate } from "@langchain/core/prompts"
 import { StringOutputParser } from "@langchain/core/output_parsers"
 import dotenv from "dotenv"
-import { getDocumentChunks } from "./get-data"
-import { cacheTag } from "next/dist/server/use-cache/cache-tag"
+import { getDocument, getDocumentChunks } from "./get-data"
 import { MemoryVectorStore } from "langchain/vectorstores/memory"
 import type { Document } from "@langchain/core/documents"
-
+import { parseDocumentFromUrl, splitText } from "./doc-processing"
 dotenv.config()
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
@@ -30,13 +29,16 @@ const embeddings = new GoogleGenerativeAIEmbeddings({
 })
 
 export async function initiateChatWithDocument(documentId: string) {
-  const chunks = await getDocumentChunks(documentId)
-  const mappedChunks: Document[] = chunks.map((chunk) => ({
-    pageContent: chunk.chunkText,
-    metadata: { embedding: chunk.embedding },
-  }))
+  const document = await getDocument(documentId)
+  if (!document) {
+    throw new Error("Document not found")
+  }
+  const filePath = document.filePath
+  const text = await parseDocumentFromUrl(filePath)
+  const chunks = await splitText(text)
+
   const vectorStore = new MemoryVectorStore(embeddings)
-  await vectorStore.addDocuments(mappedChunks)
+  await vectorStore.addDocuments(chunks)
 
   const retriever = vectorStore.asRetriever()
 
