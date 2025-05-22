@@ -27,20 +27,20 @@ export function formatRelativeTime(date: Date): React.ReactNode {
   return date.toLocaleDateString()
 }
 
-export async function readRemoteFile(url: string): Promise<string> {
-  return new Promise((resolve, reject) => {
-    https
-      .get(url, (res) => {
-        let data = ""
-        res.on("data", (chunk) => (data += chunk))
-        res.on("end", () => {
-          console.log("File contents:", data)
-          resolve(data)
-        })
-      })
-      .on("error", (err) => {
-        console.error("Error fetching file:", err.message)
-        reject(err)
-      })
-  })
-}
+// export async function readRemoteFile(url: string): Promise<string> {
+//   return new Promise((resolve, reject) => {
+//     https
+//       .get(url, (res) => {
+//         let data = ""
+//         res.on("data", (chunk) => (data += chunk))
+//         res.on("end", () => {
+//           console.log("File contents:", data)
+//           resolve(data)
+//         })
+//       })
+//       .on("error", (err) => {
+//         console.error("Error fetching file:", err.message)
+//         reject(err)
+//       })
+//   })
+// }

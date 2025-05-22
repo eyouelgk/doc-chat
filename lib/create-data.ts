@@ -6,8 +6,7 @@ import { documentChunks } from "@/db/schema"
 import { z } from "zod"
 import { revalidateTag } from "next/cache"
 import { InsertDocumentChunk, InsertDocument } from "./types"
-import chunksAndEmbeddings from "./doc-processing"
-// Define Zod schema for document validation
+
 const documentSchema = z.object({
   userId: z.string().min(1),
   file: z.object({
@@ -16,16 +15,16 @@ const documentSchema = z.object({
   }),
 })
 
-export async function createDocumentAndEmbeddings(
-  userId: string,
-  file: object
-) {
-  const createdDocument = await createDocument(userId, file)
-  const documentId = createdDocument.id!
-  const filePath = createdDocument.filePath
-  const embeddedChunks = await chunksAndEmbeddings(filePath)
-  await createDocumentChunks(documentId, embeddedChunks)
-}
+// export async function createDocumentAndEmbeddings(
+//   userId: string,
+//   file: object
+// ) {
+//   const createdDocument = await createDocument(userId, file)
+//   const documentId = createdDocument.id!
+//   const filePath = createdDocument.filePath
+//   const embeddedChunks = await chunksAndEmbeddings(filePath)
+//   await createDocumentChunks(documentId, embeddedChunks)
+// }
 
 export async function createDocument(
   userId: string,

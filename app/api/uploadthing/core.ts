@@ -1,6 +1,6 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next"
 import { UploadThingError } from "uploadthing/server"
-import { createDocumentAndEmbeddings } from "../../../lib/create-data"
+import { createDocument } from "../../../lib/create-data"
 import { getCurrentUser } from "@/lib/get-data"
 
 const f = createUploadthing()
@@ -19,7 +19,7 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       const userId = metadata.userId
-      await createDocumentAndEmbeddings(userId, file)
+      await createDocument(userId, file)
       console.log("Upload complete for userId:", userId)
       console.log("file url", file.ufsUrl)
       return { uploadedBy: userId }

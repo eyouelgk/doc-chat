@@ -42,7 +42,7 @@ export default function ChatPage() {
       const aiResponse = await sendMessageToAI(documentId, input)
       setMessages((prev) => [
         ...prev,
-        { sender: "ai", text: aiResponse || "No response." },
+        { sender: "ai", text: aiResponse.aiResponse || "No response." },
       ])
     } catch (err) {
       setMessages((prev) => [
