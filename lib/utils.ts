@@ -1,5 +1,6 @@
 import { clsx, type ClassValue } from "clsx"
 import { twMerge } from "tailwind-merge"
+import https from "https"
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -24,4 +25,22 @@ export function formatRelativeTime(date: Date): React.ReactNode {
   }
   // fallback to date string
   return date.toLocaleDateString()
+}
+
+export async function readRemoteFile(url: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    https
+      .get(url, (res) => {
+        let data = ""
+        res.on("data", (chunk) => (data += chunk))
+        res.on("end", () => {
+          console.log("File contents:", data)
+          resolve(data)
+        })
+      })
+      .on("error", (err) => {
+        console.error("Error fetching file:", err.message)
+        reject(err)
+      })
+  })
 }

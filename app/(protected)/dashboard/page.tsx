@@ -1,11 +1,11 @@
 "use client"
-
 import { useEffect, useState } from "react"
 import Link from "next/link"
 import { Button } from "../../components/ui/button"
 import { formatRelativeTime } from "@/lib/utils"
 import UploadButtonComponent from "@/app/components/upload-button"
 import SignOutButton from "../../components/SignOutButton"
+import { FileText, MessageSquare, Plus } from "lucide-react"
 
 export default function DashboardPage() {
   const [documents, setDocuments] = useState<any[]>([])
@@ -26,41 +26,41 @@ export default function DashboardPage() {
 
   return (
     <div>
-      <div className="flex items-center justify-between mr-4 ml-4 mb-4 mt-2">
-        <h1 className="text-2xl font-bold">DocuChat</h1>
-        <div className="flex items-center gap-2">
-          <SignOutButton />
-        </div>
-        <div className="fixed bottom-16 right-24 z-50">
-          <UploadButtonComponent />
-        </div>
-      </div>
-
+      <AppHeader />
       {loading ? (
-        <div>Loading...</div>
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+        </div>
       ) : documents.length > 0 ? (
-        <div className="overflow-hidden rounded-lg border border-gray-200 dark:border-dark-border-default bg-white dark:bg-dark-high shadow-sm">
-          <div className="grid grid-cols-12 gap-4 px-6 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-dark-elevated border-b border-gray-200 dark:border-dark-border-default">
+        <div className="bg-white dark:bg-dark-high rounded-xl border border-gray-200 dark:border-dark-border-default shadow-sm overflow-hidden">
+          <div className="grid grid-cols-12 gap-4 px-6 py-4 text-sm font-medium text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-dark-elevated border-b border-gray-200 dark:border-dark-border-default">
             <div className="col-span-5">File Name</div>
             <div className="col-span-3">Created</div>
-            <div className="col-span-4"> </div>
+            <div className="col-span-4 text-right">Actions</div>
           </div>
 
           <div className="divide-y divide-gray-200 dark:divide-dark-border-default">
             {documents.map((document) => (
               <div
                 key={document.id}
-                className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors"
+                className="grid grid-cols-12 gap-4 px-6 py-5 items-center hover:bg-gray-50 dark:hover:bg-dark-elevated transition-colors"
               >
-                <div className="col-span-5 font-medium truncate">
+                <div className="col-span-5 font-medium truncate flex items-center gap-3">
+                  <FileText className="h-5 w-5 text-gray-400" />
                   {document.fileName}
                 </div>
                 <div className="col-span-3 text-sm text-gray-500 dark:text-gray-400">
                   {formatRelativeTime(new Date(document.createdAt))}
                 </div>
-                <div className="col-span-4 flex gap-2">
+                <div className="col-span-4 flex justify-end gap-3">
                   <Button asChild variant="outline" size="sm">
-                    <Link href={`/chat/${document.id}`}>Start Chat</Link>
+                    <Link
+                      href={`/chat/${document.id}`}
+                      className="flex items-center gap-2"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      Chat with Document
+                    </Link>
                   </Button>
                 </div>
               </div>
@@ -68,14 +68,74 @@ export default function DashboardPage() {
           </div>
         </div>
       ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-center border border-gray-200 dark:border-dark-border-default rounded-lg bg-white dark:bg-dark-high p-8">
-          <h3 className="text-lg font-medium mb-2">No documents found</h3>
-          <p className="text-gray-500 dark:text-gray-400 mb-6">
-            Get started by uploading a document.
+        <div className="flex flex-col items-center justify-center py-16 text-center border border-gray-200 dark:border-dark-border-default rounded-xl bg-white dark:bg-dark-high p-8">
+          <div className="bg-primary/10 rounded-full p-4 mb-4">
+            <Plus className="h-8 w-8 text-primary" />
+          </div>
+          <h3 className="text-xl font-medium mb-2">No documents found</h3>
+          <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-md">
+            Upload a document to get started. You can chat with your documents
+            and get insights from them.
           </p>
           <UploadButtonComponent />
         </div>
       )}
+
+      {documents.length > 0 && (
+        <div className="fixed bottom-8 right-8 z-50">
+          <Button
+            size="lg"
+            className="rounded-full h-14 w-14 shadow-lg flex items-center justify-center p-0"
+          >
+            <UploadButtonComponent />
+          </Button>
+        </div>
+      )}
     </div>
+  )
+}
+
+function AppHeader() {
+  const [dropdownOpen, setDropdownOpen] = useState(false)
+
+  return (
+    <header className="flex items-center justify-between mb-8 relative">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+        DocuChat
+      </h1>
+      <div className="relative">
+        <button
+          onClick={() => setDropdownOpen((prev) => !prev)}
+          className="inline-flex items-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white dark:bg-dark-high text-sm font-medium text-gray-700 dark:text-white hover:bg-gray-50"
+        >
+          Menu
+          <svg
+            className="-mr-1 ml-2 h-5 w-5"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+        {dropdownOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-dark-high border border-gray-200 dark:border-dark-border-default rounded-md shadow-lg">
+            <Link
+              href="/user-profile"
+              className="block px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-dark-elevated"
+            >
+              Profile
+            </Link>
+            <SignOutButton />
+          </div>
+        )}
+      </div>
+    </header>
   )
 }

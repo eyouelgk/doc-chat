@@ -1,8 +1,9 @@
 "use client"
 
-import { LogOutIcon } from "lucide-react"
+import { LogOut } from "lucide-react"
 import { useTransition } from "react"
 import { signOut } from "@/app/actions/auth"
+import { Button } from "./ui/button"
 
 export default function SignOutButton() {
   const [isPending, startTransition] = useTransition()
@@ -14,13 +15,14 @@ export default function SignOutButton() {
   }
 
   return (
-    <button
+    <Button
       onClick={handleSignOut}
       disabled={isPending}
-      className="flex items-center w-full px-2 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-md transition-colors"
+      variant="outline"
+      className="flex items-center gap-2"
     >
-      <LogOutIcon size={20} className="mr-2" />
+      <LogOut className="h-4 w-4" />
       <span>{isPending ? "Signing out..." : "Sign Out"}</span>
-    </button>
+    </Button>
   )
 }

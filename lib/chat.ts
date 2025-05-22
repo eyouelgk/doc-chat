@@ -1,15 +1,20 @@
-import getRetriever from "./embedding"
-import { ChatGoogleGenerativeAI } from "@langchain/google-genai"
+import {
+  ChatGoogleGenerativeAI,
+  GoogleGenerativeAIEmbeddings,
+} from "@langchain/google-genai"
 import {
   RunnablePassthrough,
   RunnableSequence,
 } from "@langchain/core/runnables"
-import { ChatPromptTemplate, PromptTemplate } from "@langchain/core/prompts"
+import { TaskType } from "@google/generative-ai"
+import { ChatPromptTemplate } from "@langchain/core/prompts"
 import { StringOutputParser } from "@langchain/core/output_parsers"
 import dotenv from "dotenv"
-import { db } from "../db"
-import { documents } from "@/db/schema"
-import { eq } from "drizzle-orm"
+import { getDocumentChunks } from "./get-data"
+import { cacheTag } from "next/dist/server/use-cache/cache-tag"
+import { MemoryVectorStore } from "langchain/vectorstores/memory"
+import type { Document } from "@langchain/core/documents"
+
 dotenv.config()
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
@@ -18,41 +23,43 @@ const model = new ChatGoogleGenerativeAI({
   temperature: 0,
   apiKey: GOOGLE_API_KEY,
 })
+const embeddings = new GoogleGenerativeAIEmbeddings({
+  model: "text-embedding-004", // 768 dimensions
+  taskType: TaskType.RETRIEVAL_DOCUMENT,
+  apiKey: GOOGLE_API_KEY,
+})
 
-async function initiateChatWithDocument(documentId: string) {
-  if (!documentId) {
-    throw new Error("Document ID is required")
-  }
-  const files = await db
-    .select({ filePath: documents.filePath })
-    .from(documents)
-    .where(eq(documents.id, documentId))
-  if (!files.length) {
-    throw new Error("No document found for the provided ID")
-  }
-  const filePath = files[0].filePath
-  const retriever = await getRetriever(filePath)
+export async function initiateChatWithDocument(documentId: string) {
+  const chunks = await getDocumentChunks(documentId)
+  const mappedChunks: Document[] = chunks.map((chunk) => ({
+    pageContent: chunk.chunkText,
+    metadata: { embedding: chunk.embedding },
+  }))
+  const vectorStore = new MemoryVectorStore(embeddings)
+  await vectorStore.addDocuments(mappedChunks)
+
+  const retriever = vectorStore.asRetriever()
+
   const outputParser = new StringOutputParser()
   const systemPrompt = `
 - You are an assistant designed to assist users by providing information, if possible based on the context provided.
 - You must not guess, provide information that is not explicitly mentioned, hallucinate or create answers.
 - {context}
 -     `
-
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", systemPrompt],
     ["human", "{input}"],
   ])
+
   const chain = RunnableSequence.from([
-    { question: new RunnablePassthrough(), context: async () => retriever },
+    {
+      input: new RunnablePassthrough(),
+      context: retriever.getRelevantDocuments.bind(retriever),
+    },
     prompt,
     model,
     outputParser,
   ])
+  console.log("Chain created successfully.")
   return chain
-}
-export async function chatWithDocument(documentId: string, question: string) {
-  const chatChain = await initiateChatWithDocument(documentId)
-  const response = await chatChain.invoke({ input: question })
-  return response
 }

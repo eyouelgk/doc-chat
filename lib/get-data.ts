@@ -88,8 +88,6 @@ export async function getMessages(id: string) {
   }
 }
 export async function getDocument(id: string) {
-  "use cache"
-  cacheTag("documents")
   try {
     const result = await db.query.documents.findFirst({
       where: eq(documents.id, id),
@@ -101,8 +99,6 @@ export async function getDocument(id: string) {
   }
 }
 export async function getDocuments(id: string) {
-  "use cache"
-  cacheTag("documents")
   try {
     const result = await db.query.documents.findMany({
       where: eq(documents.userId, id),
@@ -115,8 +111,6 @@ export async function getDocuments(id: string) {
   }
 }
 export async function getDocumentChunks(documentId: string) {
-  "use cache"
-  cacheTag("documentChunks")
   try {
     const result = await db.query.documentChunks.findMany({
       where: eq(documentChunks.documentId, documentId),

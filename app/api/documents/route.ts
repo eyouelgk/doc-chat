@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
-import { getCurrentUser, getDocuments } from "@/lib/data-access"
+import { getCurrentUser, getDocuments } from "@/lib/get-data"
 
 export async function GET(req: NextRequest) {
   const user = await getCurrentUser()

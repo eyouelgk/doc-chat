@@ -7,7 +7,7 @@ import {
   createUser,
   deleteSession,
 } from "@/lib/auth"
-import { getUserByEmail } from "@/lib/data-access"
+import { getUserByEmail } from "@/lib/get-data"
 import { redirect } from "next/navigation"
 
 // Define Zod schema for signin validation

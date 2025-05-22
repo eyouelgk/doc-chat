@@ -14,22 +14,14 @@ import { relations } from "drizzle-orm"
 // Define an enum for message roles (e.g., 'user', 'assistant')
 export const messageRoleEnum = pgEnum("message_role", ["user", "assistant"])
 
-export const users = pgTable(
-  "users",
-  {
-    id: uuid("id").primaryKey().defaultRandom(),
-    hashedPassword: text("hashed_password").notNull(),
-    email: varchar("email", { length: 255 }).notNull().unique(),
-    userName: varchar("name", { length: 255 }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (users) => {
-    return {
-      emailIdx: uniqueIndex("email_idx").on(users.email),
-    }
-  }
-)
+export const users = pgTable("users", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  hashedPassword: text("hashed_password").notNull(),
+  email: varchar("email", { length: 255 }).notNull().unique(),
+  userName: varchar("name", { length: 255 }),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+})
 
 export const documents = pgTable("documents", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -43,13 +35,13 @@ export const documents = pgTable("documents", {
 })
 
 export const documentChunks = pgTable("document_chunks", {
-  id: uuid("id").primaryKey().defaultRandom(),
+  id: uuid("id").primaryKey().defaultRandom().notNull(),
   documentId: uuid("document_id")
     .notNull()
     .references(() => documents.id, { onDelete: "cascade" }),
   chunkText: text("chunk_text").notNull(),
   chunkIndex: integer("chunk_index").notNull(),
-  embedding: vector("embeddings", { dimensions: 1536 }),
+  embedding: vector("embeddings", { dimensions: 768 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
