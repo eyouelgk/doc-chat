@@ -3,7 +3,6 @@
 import { LogOut } from "lucide-react"
 import { useTransition } from "react"
 import { signOut } from "@/app/actions/auth"
-import { Button } from "./ui/button"
 
 export default function SignOutButton() {
   const [isPending, startTransition] = useTransition()
@@ -15,14 +14,15 @@ export default function SignOutButton() {
   }
 
   return (
-    <Button
+    <button
       onClick={handleSignOut}
       disabled={isPending}
-      variant="outline"
-      className="flex items-center gap-2"
+      className="block w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-dark-elevated"
     >
-      <LogOut className="h-4 w-4" />
-      <span>{isPending ? "Signing out..." : "Sign Out"}</span>
-    </Button>
+      <div className="flex items-center gap-2">
+        <LogOut className="h-4 w-4" />
+        <span>{isPending ? "Signing out..." : "Sign Out"}</span>
+      </div>
+    </button>
   )
 }

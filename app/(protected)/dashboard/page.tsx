@@ -5,11 +5,62 @@ import { Button } from "../../components/ui/button"
 import { formatRelativeTime } from "@/lib/utils"
 import UploadButtonComponent from "@/app/components/upload-button"
 import SignOutButton from "../../components/SignOutButton"
-import { FileText, MessageSquare, Plus } from "lucide-react"
+import {
+  MoreHorizontal,
+  Pencil,
+  Replace,
+  Trash,
+  FileText,
+  MessageSquare,
+  Plus,
+} from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/app/components/ui/dropdown-menu"
+import { toast } from "sonner"
 
 export default function DashboardPage() {
   const [documents, setDocuments] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
+  const handleRenameDocument = (id: string) => {
+    // This will be implemented with a modal in a future update
+    console.log("Rename document:", id)
+    // For now, just show a toast
+    toast.info("Rename functionality will be available soon")
+  }
+
+  const handleReplaceDocument = (id: string) => {
+    // This will be implemented with the upload component in a future update
+    console.log("Replace document:", id)
+    // For now, just show a toast
+    toast.info("Replace functionality will be available soon")
+  }
+
+  const handleDeleteDocument = async (id: string) => {
+    if (confirm("Are you sure you want to delete this document?")) {
+      try {
+        const res = await fetch(`/api/documents/${id}`, {
+          method: "DELETE",
+        })
+
+        if (res.ok) {
+          toast.success("Document deleted successfully")
+          // Refresh the documents list
+          setDocuments(documents.filter((doc) => doc.id !== id))
+        } else {
+          toast.error("Failed to delete document")
+        }
+      } catch (error) {
+        console.error("Error deleting document:", error)
+        toast.error("An error occurred while deleting the document")
+      }
+    }
+  }
 
   useEffect(() => {
     async function fetchDocuments() {
@@ -62,6 +113,36 @@ export default function DashboardPage() {
                       Chat with Document
                     </Link>
                   </Button>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                        <span className="sr-only">Open menu</span>
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem
+                        onClick={() => handleRenameDocument(document.id)}
+                      >
+                        <Pencil className="mr-2 h-4 w-4" />
+                        <span>Rename</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        onClick={() => handleReplaceDocument(document.id)}
+                      >
+                        <Replace className="mr-2 h-4 w-4" />
+                        <span>Replace</span>
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        variant="destructive"
+                        onClick={() => handleDeleteDocument(document.id)}
+                      >
+                        <Trash className="mr-2 h-4 w-4" />
+                        <span>Delete</span>
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
                 </div>
               </div>
             ))}
@@ -83,12 +164,7 @@ export default function DashboardPage() {
 
       {documents.length > 0 && (
         <div className="fixed bottom-8 right-8 z-50">
-          <Button
-            size="lg"
-            className="rounded-full h-14 w-14 shadow-lg flex items-center justify-center p-0"
-          >
-            <UploadButtonComponent />
-          </Button>
+          <UploadButtonComponent />
         </div>
       )}
     </div>

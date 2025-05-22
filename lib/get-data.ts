@@ -58,15 +58,18 @@ export async function getConversation(id: string) {
   }
 }
 export async function getConversations() {
-  "use cache"
-  cacheTag("conversations")
   try {
+    const user = await getCurrentUser()
+    if (!user) return []
+
     const result = await db.query.conversations.findMany({
-      with: {
-        user: true,
-      },
+      where: eq(conversations.userId, user.id),
       orderBy: (conversations, { desc }) => [desc(conversations.createdAt)],
+      with: {
+        document: true,
+      },
     })
+
     return result
   } catch (error) {
     console.error("Error fetching conversations:", error)

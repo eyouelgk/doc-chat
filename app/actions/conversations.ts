@@ -1,14 +1,11 @@
 "use server"
 
 import { initiateChatWithDocument } from "@/lib/chat"
-// import { db } from "@/db"
-// import { conversations, messages } from "@/db/schema"
-// import { eq } from "drizzle-orm"
-// import { getCurrentUser } from "@/lib/get-data"
-// import { z } from "zod"
-// import { revalidateTag } from "next/cache"
-// import { redirect } from "next/navigation"
-// import { cacheTag } from "next/dist/server/use-cache/cache-tag"
+import { db } from "@/db"
+import { conversations, messages } from "@/db/schema"
+import { eq } from "drizzle-orm"
+import { getCurrentUser } from "@/lib/get-data"
+import { revalidateTag } from "next/cache"
 
 export type ChatActionResponse = {
   success: boolean
@@ -17,15 +14,27 @@ export type ChatActionResponse = {
   error?: string
 }
 
-export async function sendMessageToAI(documentId: string, message: string) {
-  const chain = await initiateChatWithDocument(documentId)
-  if (!chain) {
-    return { success: false, error: "Failed to initiate chat" }
-  }
+export type ConversationActionResponse = {
+  success: boolean
+  message?: string
+  conversationId?: string
+  error?: string
+}
+
+export async function sendMessageToAI(
+  documentId: string,
+  message: string
+): Promise<ChatActionResponse> {
   try {
-    if (!chain || !message) {
-      return { success: false, error: "Missing document ID or message" }
+    const chain = await initiateChatWithDocument(documentId)
+    if (!chain) {
+      return { success: false, error: "Failed to initiate chat" }
     }
+
+    if (!message) {
+      return { success: false, error: "Missing message" }
+    }
+
     const aiResponse = await chain.invoke(message)
     return { success: true, aiResponse }
   } catch (error) {
@@ -33,135 +42,143 @@ export async function sendMessageToAI(documentId: string, message: string) {
     return { success: false, error: "Failed to get AI response" }
   }
 }
-// Define Zod schema for issue validation
-// const ConversationSchema = z.object({
-//   title: z
-//     .string()
-//     .min(3, "Title must be at least 3 characters")
-//     .max(100, "Title must be less than 100 characters"),
-//   description: z.string().optional().nullable(),
-//   userId: z.string().min(1, "User ID is required"),
-// })
 
-// export type ConversationData = z.infer<typeof ConversationSchema>
+// Save a new conversation
+export async function saveConversation(
+  documentId: string
+): Promise<ConversationActionResponse> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return {
+        success: false,
+        message: "Unauthorized access",
+        error: "Unauthorized",
+      }
+    }
 
-// export type ActionResponse = {
-//   success: boolean
-//   message: string
-//   errors?: Record<string, string[]>
-//   error?: string
-// }
+    // Create conversation
+    const [conversation] = await db
+      .insert(conversations)
+      .values({
+        userId: user.id,
+        documentId,
+        title: "New Conversation", // Default title
+      })
+      .returning()
 
-// export async function createConversation(
-//   data: ConversationData
-// ): Promise<ActionResponse> {
-//   try {
-//     const user = await getCurrentUser()
-//     if (!user) {
-//       return {
-//         success: false,
-//         message: "Unauthorized access",
-//         error: "Unauthorized",
-//       }
-//     }
+    revalidateTag("conversations")
 
-//     // Validate with Zod
-//     const validationResult = ConversationSchema.safeParse(data)
-//     if (!validationResult.success) {
-//       return {
-//         success: false,
-//         message: "Validation failed",
-//         errors: validationResult.error.flatten().fieldErrors,
-//       }
-//     }
+    return {
+      success: true,
+      message: "Conversation created successfully",
+      conversationId: conversation.id,
+    }
+  } catch (error) {
+    console.error("Error creating conversation:", error)
+    return {
+      success: false,
+      message: "An error occurred while creating the conversation",
+      error: "Failed to create conversation",
+    }
+  }
+}
 
-//     // Create conversation with validated data
-//     const validatedData = validationResult.data
-//     await db.insert(conversations).values({
-//       title: validatedData.title,
-//       userId: validatedData.userId,
-//     })
+// Save a message to a conversation
+export async function saveMessage(
+  conversationId: string,
+  role: "user" | "assistant",
+  content: string
+): Promise<ChatActionResponse> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return {
+        success: false,
+        message: "Unauthorized access",
+        error: "Unauthorized",
+      }
+    }
 
-//     revalidateTag("conversations")
+    // Save message
+    await db.insert(messages).values({
+      conversationId,
+      role,
+      content,
+    })
 
-//     return { success: true, message: "Conversation created successfully" }
-//   } catch (error) {
-//     console.error("Error creating conversation:", error)
-//     return {
-//       success: false,
-//       message: "An error occurred while creating the conversation",
-//       error: "Failed to create conversation",
-//     }
-//   }
-// }
+    revalidateTag("messages")
 
-// export async function updateConversation(
-//   id: string,
-//   data: Partial<ConversationData>
-// ): Promise<ActionResponse> {
-//   try {
-//     const user = await getCurrentUser()
-//     if (!user) {
-//       return {
-//         success: false,
-//         message: "Unauthorized access",
-//         error: "Unauthorized",
-//       }
-//     }
+    return { success: true, message: "Message saved successfully" }
+  } catch (error) {
+    console.error("Error saving message:", error)
+    return {
+      success: false,
+      message: "An error occurred while saving the message",
+      error: "Failed to save message",
+    }
+  }
+}
 
-//     // Allow partial validation for updates
-//     const UpdateConversationSchema = ConversationSchema.partial()
-//     const validationResult = UpdateConversationSchema.safeParse(data)
+// Update conversation title
+export async function updateConversationTitle(
+  id: string,
+  title: string
+): Promise<ConversationActionResponse> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return {
+        success: false,
+        message: "Unauthorized access",
+        error: "Unauthorized",
+      }
+    }
 
-//     if (!validationResult.success) {
-//       return {
-//         success: false,
-//         message: "Validation failed",
-//         errors: validationResult.error.flatten().fieldErrors,
-//       }
-//     }
+    await db
+      .update(conversations)
+      .set({ title, updatedAt: new Date() })
+      .where(eq(conversations.id, id))
 
-//     const validatedData = validationResult.data
-//     const updateData: Record<string, unknown> = {}
+    revalidateTag("conversations")
 
-//     if (validatedData.title !== undefined)
-//       updateData.title = validatedData.title
-//     if (validatedData.description !== undefined)
-//       updateData.description = validatedData.description
+    return { success: true, message: "Conversation updated successfully" }
+  } catch (error) {
+    console.error("Error updating conversation:", error)
+    return {
+      success: false,
+      message: "An error occurred while updating the conversation",
+      error: "Failed to update conversation",
+    }
+  }
+}
 
-//     await db
-//       .update(conversations)
-//       .set(updateData)
-//       .where(eq(conversations.id, id))
+// Delete a conversation
+export async function deleteConversation(
+  id: string
+): Promise<ConversationActionResponse> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return {
+        success: false,
+        message: "Unauthorized access",
+        error: "Unauthorized",
+      }
+    }
 
-//     return { success: true, message: "Conversation updated successfully" }
-//   } catch (error) {
-//     console.error("Error updating conversation:", error)
-//     return {
-//       success: false,
-//       message: "An error occurred while updating the conversation",
-//       error: "Failed to update conversation",
-//     }
-//   }
-// }
+    // Delete conversation
+    await db.delete(conversations).where(eq(conversations.id, id))
 
-// export async function deleteConversation(id: string): Promise<ActionResponse> {
-//   try {
-//     const user = await getCurrentUser()
-//     if (!user) {
-//       throw new Error("Unauthorized")
-//     }
+    revalidateTag("conversations")
 
-//     // Delete conversation
-//     await db.delete(conversations).where(eq(conversations.id, id))
-
-//     return { success: true, message: "Conversation deleted successfully" }
-//   } catch (error) {
-//     console.error("Error deleting conversation:", error)
-//     return {
-//       success: false,
-//       message: "An error occurred while deleting the conversation",
-//       error: "Failed to delete conversation",
-//     }
-//   }
-// }
+    return { success: true, message: "Conversation deleted successfully" }
+  } catch (error) {
+    console.error("Error deleting conversation:", error)
+    return {
+      success: false,
+      message: "An error occurred while deleting the conversation",
+      error: "Failed to delete conversation",
+    }
+  }
+}

@@ -10,9 +10,8 @@ import { TaskType } from "@google/generative-ai"
 import { ChatPromptTemplate } from "@langchain/core/prompts"
 import { StringOutputParser } from "@langchain/core/output_parsers"
 import dotenv from "dotenv"
-import { getDocument, getDocumentChunks } from "./get-data"
+import { getDocument } from "./get-data"
 import { MemoryVectorStore } from "langchain/vectorstores/memory"
-import type { Document } from "@langchain/core/documents"
 import { parseDocumentFromUrl, splitText } from "./doc-processing"
 dotenv.config()
 
@@ -40,14 +39,24 @@ export async function initiateChatWithDocument(documentId: string) {
   const vectorStore = new MemoryVectorStore(embeddings)
   await vectorStore.addDocuments(chunks)
 
-  const retriever = vectorStore.asRetriever()
+  const retriever = vectorStore.asRetriever(10)
 
   const outputParser = new StringOutputParser()
   const systemPrompt = `
-- You are an assistant designed to assist users by providing information, if possible based on the context provided.
-- You must not guess, provide information that is not explicitly mentioned, hallucinate or create answers.
-- {context}
--     `
+You are DocuChat, an AI assistant specialized in providing information from documents.
+
+RULES:
+- Always base your answers on the provided document context.
+- If the answer is not in the context, say "I don't see information about that in the document."
+- Never make up information or hallucinate facts.
+- Keep responses concise and focused on the user's question.
+- When quoting from the document, use quotation marks and indicate the source.
+- If asked about something outside the document's scope, politely redirect to the document content.
+- Format your responses for readability with paragraphs and bullet points when appropriate.
+
+CONTEXT:
+{context}
+`
   const prompt = ChatPromptTemplate.fromMessages([
     ["system", systemPrompt],
     ["human", "{input}"],
