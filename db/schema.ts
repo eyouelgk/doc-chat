@@ -12,7 +12,11 @@ import {
 import { relations } from "drizzle-orm"
 
 // Define an enum for message roles (e.g., 'user', 'assistant')
-export const messageRoleEnum = pgEnum("message_role", ["user", "assistant"])
+export const messageRoleEnum = pgEnum("message_role", [
+  "user",
+  "admin",
+  "assistant",
+])
 
 export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
@@ -21,6 +25,7 @@ export const users = pgTable("users", {
   userName: varchar("name", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  role: messageRoleEnum("role").notNull().default("user"),
 })
 
 export const documents = pgTable("documents", {

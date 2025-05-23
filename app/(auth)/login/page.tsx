@@ -11,9 +11,10 @@ import {
   FormError,
 } from "@/app/components/ui/Form"
 import Link from "next/link"
-import toast from "react-hot-toast"
+import { toast } from "sonner"
 import { signIn, type ActionResponse } from "@/app/actions/auth"
 import { ThemeToggle } from "@/app/components/theme-toggle"
+import { FileText } from "lucide-react"
 
 const initialState: ActionResponse = {
   success: false,
@@ -24,7 +25,6 @@ const initialState: ActionResponse = {
 export default function SignInPage() {
   const router = useRouter()
 
-  // Use useActionState hook for the form submission action
   const [state, formAction, isPending] = useActionState<
     ActionResponse,
     FormData
@@ -32,7 +32,6 @@ export default function SignInPage() {
     try {
       const result = await signIn(formData)
 
-      // Handle successful submission
       if (result.success) {
         toast.success("Signed in successfully")
         router.push("/dashboard")
@@ -56,16 +55,22 @@ export default function SignInPage() {
       </div>
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h1 className="text-center text-3xl font-extrabold text-foreground">
-          DocuChat
-        </h1>
-        <h2 className="mt-2 text-center text-2xl font-bold text-foreground">
+        <div className="flex items-center justify-center gap-3 mb-6">
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary">
+            <FileText className="h-5 w-5 text-primary-foreground" />
+          </div>
+          <h1 className="text-3xl font-bold text-foreground">DocChat</h1>
+        </div>
+        <h2 className="text-center text-2xl font-semibold text-foreground">
           Sign in to your account
         </h2>
+        <p className="mt-2 text-center text-sm text-muted-foreground">
+          Chat with your documents using AI
+        </p>
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-card py-8 px-4 shadow sm:rounded-lg sm:px-10 border border-border">
+        <div className="bg-card py-8 px-6 shadow-lg sm:rounded-xl sm:px-10 border border-border">
           <Form action={formAction} className="space-y-6">
             {state?.message && !state.success && (
               <FormError>{state.message}</FormError>
@@ -81,10 +86,10 @@ export default function SignInPage() {
                 required
                 disabled={isPending}
                 aria-describedby="email-error"
-                className={state?.errors?.email ? "border-red-500" : ""}
+                className={state?.errors?.email ? "border-destructive" : ""}
               />
               {state?.errors?.email && (
-                <p id="email-error" className="text-sm text-red-500">
+                <p id="email-error" className="text-sm text-destructive">
                   {state.errors.email[0]}
                 </p>
               )}
@@ -100,10 +105,10 @@ export default function SignInPage() {
                 required
                 disabled={isPending}
                 aria-describedby="password-error"
-                className={state?.errors?.password ? "border-red-500" : ""}
+                className={state?.errors?.password ? "border-destructive" : ""}
               />
               {state?.errors?.password && (
-                <p id="password-error" className="text-sm text-red-500">
+                <p id="password-error" className="text-sm text-destructive">
                   {state.errors.password[0]}
                 </p>
               )}
@@ -121,7 +126,7 @@ export default function SignInPage() {
               Don&apos;t have an account?{" "}
               <Link
                 href="/signup"
-                className="font-medium text-foreground hover:text-primary"
+                className="font-medium text-primary hover:text-primary/80"
               >
                 Sign up
               </Link>

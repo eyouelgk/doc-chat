@@ -6,7 +6,6 @@ import { RecursiveCharacterTextSplitter } from "langchain/text_splitter"
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf"
 import { DocxLoader } from "@langchain/community/document_loaders/fs/docx"
 import { TextLoader } from "langchain/document_loaders/fs/text"
-import { CSVLoader } from "@langchain/community/document_loaders/fs/csv"
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx"
 import dotenv from "dotenv"
 dotenv.config()
@@ -34,26 +33,7 @@ export async function parseDocumentFromUrl(url: string): Promise<Document> {
           metadata: {},
         }
         return mergedDoc
-      case "text/plain":
-      case "text/html":
-      case "text/markdown":
-        const textBlob = new Blob([buffer], { type: mime })
-        const textloader = new TextLoader(textBlob)
-        const textDocs = await textloader.load()
-        const mergedTextDoc = {
-          pageContent: textDocs.map((doc) => doc.pageContent).join("\n"),
-          metadata: {},
-        }
-        return mergedTextDoc
-      case "text/csv":
-        const csvBlob = new Blob([buffer], { type: mime })
-        const csvloader = new CSVLoader(csvBlob)
-        const csvText = await csvloader.load()
-        const mergedCsvDoc = {
-          pageContent: csvText.map((doc) => doc.pageContent).join("\n"),
-          metadata: {},
-        }
-        return mergedCsvDoc
+
       case "application/vnd.openxmlformats-officedocument.wordprocessingml.document":
         const docxBlob = new Blob([buffer], { type: mime })
         const docxloader = new DocxLoader(docxBlob, { type: "docx" })
@@ -62,7 +42,8 @@ export async function parseDocumentFromUrl(url: string): Promise<Document> {
           pageContent: docxText.map((doc) => doc.pageContent).join("\n"),
           metadata: {},
         }
-      case "application/msword":
+      case "application/x-cfb":
+        console.log(mime)
         const docBlob = new Blob([buffer], { type: mime })
         const docloader = new DocxLoader(docBlob, { type: "doc" })
         const docText = await docloader.load()
@@ -79,13 +60,25 @@ export async function parseDocumentFromUrl(url: string): Promise<Document> {
           metadata: {},
         }
       default:
-        console.error(`Unsupported file type: ${fileType.ext}`)
+        console.error(
+          `Unsupported file type: ${fileType.ext} of ${fileType.mime}`
+        )
         return { pageContent: "Unsupported file type", metadata: {} }
     }
+  } else if (fileType === undefined && buffer) {
+    const mime = "text/plain"
+    const textBlob = new Blob([buffer], { type: mime })
+    const textloader = new TextLoader(textBlob)
+    const textDocs = await textloader.load()
+    const mergedTextDoc = {
+      pageContent: textDocs.map((doc) => doc.pageContent).join("\n"),
+      metadata: {},
+    }
+    return mergedTextDoc
   } else {
     console.error("Unknown file type")
-    return { pageContent: "Unknown file type", metadata: {} }
   }
+  return { pageContent: "Unknown file type", metadata: {} }
 }
 
 export async function splitText(document: Document) {
@@ -96,21 +89,4 @@ export async function splitText(document: Document) {
   const chunks = await splitter.splitDocuments([document])
   console.log("Chunks:", chunks.length)
   return chunks
-}
-
-async function generateEmbeddings(chunks: Document[]) {
-  const texts = chunks.map((chunk) => chunk.pageContent)
-  const embeddingsVectors = await embeddings.embedDocuments(texts)
-  console.log("Embeddings:", embeddingsVectors.length, "Chunks:", chunks.length)
-  return chunks.map((chunk, index) => ({
-    chunkText: chunk.pageContent,
-    chunkIndex: index,
-    embedding: embeddingsVectors[index],
-  }))
-}
-export default async function chunksAndEmbeddings(url: string) {
-  const document = await parseDocumentFromUrl(url)
-  const chunks = await splitText(document)
-  const embeddings = await generateEmbeddings(chunks)
-  return embeddings
 }

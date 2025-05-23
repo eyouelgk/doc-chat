@@ -1,13 +1,9 @@
 @import "tailwindcss";
-
 @import "uploadthing/tw/v4";
-
 @import "tw-animate-css";
 
-/*---break--- */
-
 @custom-variant dark (&:is(.dark *));
-@source "../node_modules/@uploadthing/react/dist"; /** <-- depends on your project structure */
+@source "../node_modules/@uploadthing/react/dist";
 
 @theme inline {
   --color-background: var(--background);
@@ -49,8 +45,6 @@
   --radius-xl: calc(var(--radius) + 4px);
 }
 
-/*---break--- */
-
 :root {
   --radius: 0.625rem;
   --background: oklch(1 0 0);
@@ -86,8 +80,6 @@
   --sidebar-ring: oklch(0.708 0 0);
 }
 
-/*---break--- */
-
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -122,13 +114,51 @@
   --sidebar-ring: oklch(0.556 0 0);
 }
 
-/*---break--- */
-
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: hsl(var(--muted-foreground) / 0.3);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: hsl(var(--muted-foreground) / 0.5);
+}
+
+/* Loading animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite linear;
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted-foreground) / 0.1) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200px 100%;
 }

@@ -1,5 +1,8 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { getCurrentUser, getConversations } from "@/lib/get-data"
+import { getCurrentUser } from "@/lib/get-data"
+import { db } from "@/db"
+import { conversations } from "@/db/schema"
+import { eq, and, desc } from "drizzle-orm"
 
 export async function GET(req: NextRequest) {
   try {
@@ -8,9 +11,31 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const conversations = await getConversations()
+    const { searchParams } = new URL(req.url)
+    const documentId = searchParams.get("documentId")
 
-    return NextResponse.json({ conversations })
+    let query = db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.userId, user.id))
+      .orderBy(desc(conversations.updatedAt))
+
+    if (documentId) {
+      query = db
+        .select()
+        .from(conversations)
+        .where(
+          and(
+            eq(conversations.userId, user.id),
+            eq(conversations.documentId, documentId)
+          )
+        )
+        .orderBy(desc(conversations.updatedAt))
+    }
+
+    const userConversations = await query
+
+    return NextResponse.json({ conversations: userConversations })
   } catch (error) {
     console.error("Error fetching conversations:", error)
     return NextResponse.json(

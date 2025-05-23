@@ -35,7 +35,15 @@ export async function sendMessageToAI(
       return { success: false, error: "Missing message" }
     }
 
-    const aiResponse = await chain.invoke(message)
+    // Enhanced prompt for better responses
+    const enhancedPrompt = `Based on the document content, please answer the following question. 
+    Provide a comprehensive and helpful response that draws from the document's information. 
+    If the question relates to topics not covered in the document, you may provide general knowledge 
+    but clearly indicate when you're going beyond the document's scope.
+    
+    Question: ${message}`
+
+    const aiResponse = await chain.invoke(enhancedPrompt)
     return { success: true, aiResponse }
   } catch (error) {
     console.error("AI chat error:", error)
@@ -43,9 +51,9 @@ export async function sendMessageToAI(
   }
 }
 
-// Save a new conversation
 export async function saveConversation(
-  documentId: string
+  documentId: string,
+  title?: string
 ): Promise<ConversationActionResponse> {
   try {
     const user = await getCurrentUser()
@@ -57,13 +65,12 @@ export async function saveConversation(
       }
     }
 
-    // Create conversation
     const [conversation] = await db
       .insert(conversations)
       .values({
         userId: user.id,
         documentId,
-        title: "New Conversation", // Default title
+        title: title || "New Conversation",
       })
       .returning()
 
@@ -84,7 +91,6 @@ export async function saveConversation(
   }
 }
 
-// Save a message to a conversation
 export async function saveMessage(
   conversationId: string,
   role: "user" | "assistant",
@@ -100,7 +106,6 @@ export async function saveMessage(
       }
     }
 
-    // Save message
     await db.insert(messages).values({
       conversationId,
       role,
@@ -120,7 +125,6 @@ export async function saveMessage(
   }
 }
 
-// Update conversation title
 export async function updateConversationTitle(
   id: string,
   title: string
@@ -153,7 +157,6 @@ export async function updateConversationTitle(
   }
 }
 
-// Delete a conversation
 export async function deleteConversation(
   id: string
 ): Promise<ConversationActionResponse> {
@@ -167,7 +170,6 @@ export async function deleteConversation(
       }
     }
 
-    // Delete conversation
     await db.delete(conversations).where(eq(conversations.id, id))
 
     revalidateTag("conversations")

@@ -15,6 +15,7 @@ import { updateUserProfile, changeUserPassword } from "@/app/actions/profile"
 import { toast } from "react-hot-toast"
 import { ArrowLeft, Save, Lock, User } from "lucide-react"
 import Link from "next/link"
+import { Skeleton } from "@/app/components/ui/skeleton"
 
 type UserType = {
   id: string
@@ -101,135 +102,166 @@ export default function ProfilePage() {
     fetchUserData()
   }, [])
 
-  if (loading) {
+  function ProfileSkeleton() {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-primary"></div>
+      <div className="container mx-auto px-4 py-8 max-w-3xl">
+        <div className="flex items-center gap-4 mb-8">
+          <Skeleton className="h-10 w-10 rounded-full" />
+          <Skeleton className="h-8 w-40" />
+        </div>
+        <div className="grid gap-8">
+          <div>
+            <Skeleton className="h-8 w-48 mb-4" />
+            <Skeleton className="h-32 w-full mb-2" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <div>
+            <Skeleton className="h-8 w-48 mb-4" />
+            <Skeleton className="h-32 w-full mb-2" />
+            <Skeleton className="h-10 w-40" />
+          </div>
+        </div>
       </div>
     )
   }
 
+  if (loading) {
+    return <ProfileSkeleton />
+  }
+
   return (
-    <div className="container mx-auto px-4 py-8 max-w-3xl">
-      <div className="flex items-center gap-4 mb-8">
-        <Button variant="ghost" size="icon" asChild>
-          <Link href="/dashboard">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold">Your Profile</h1>
-      </div>
+    <>
+      {loading ? (
+        <ProfileSkeleton />
+      ) : (
+        <div className="container mx-auto px-4 py-8 max-w-3xl">
+          <div className="flex items-center gap-4 mb-8">
+            <Button variant="ghost" size="icon" asChild>
+              <Link href="/dashboard">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            </Button>
+            <h1 className="text-3xl font-bold">Your Profile</h1>
+          </div>
 
-      <div className="grid gap-8">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <User className="h-5 w-5" />
-              Profile Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form action={formAction} className="space-y-4">
-              <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  name="email"
-                  type="email"
-                  defaultValue={user?.email || ""}
-                  disabled
-                  className="bg-muted"
-                />
-                <p className="text-sm text-muted-foreground">
-                  Your email address cannot be changed
-                </p>
-              </div>
+          <div className="grid gap-8">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <User className="h-5 w-5" />
+                  Profile Information
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form action={formAction} className="space-y-4">
+                  <div className="grid gap-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      defaultValue={user?.email || ""}
+                      disabled
+                      className="bg-muted"
+                    />
+                    <p className="text-sm text-muted-foreground">
+                      Your email address cannot be changed
+                    </p>
+                  </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="userName">Name</Label>
-                <Input
-                  id="userName"
-                  name="userName"
-                  defaultValue={user?.userName || ""}
-                  placeholder="Your name"
-                />
-              </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="userName">Name</Label>
+                    <Input
+                      id="userName"
+                      name="userName"
+                      defaultValue={user?.userName || ""}
+                      placeholder="Your name"
+                    />
+                  </div>
 
-              <Button type="submit" disabled={isPending} className="flex gap-2">
-                {isPending ? (
-                  <>Saving...</>
-                ) : (
-                  <>
-                    <Save className="h-4 w-4" />
-                    Save Changes
-                  </>
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
+                  <Button
+                    type="submit"
+                    disabled={isPending}
+                    className="flex gap-2"
+                  >
+                    {isPending ? (
+                      <>Saving...</>
+                    ) : (
+                      <>
+                        <Save className="h-4 w-4" />
+                        Save Changes
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Lock className="h-5 w-5" />
-              Change Password
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <form
-              id="password-form"
-              action={passwordFormAction}
-              className="space-y-4"
-            >
-              <div className="grid gap-2">
-                <Label htmlFor="currentPassword">Current Password</Label>
-                <Input
-                  id="currentPassword"
-                  name="currentPassword"
-                  type="password"
-                  required
-                />
-              </div>
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Lock className="h-5 w-5" />
+                  Change Password
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form
+                  id="password-form"
+                  action={passwordFormAction}
+                  className="space-y-4"
+                >
+                  <div className="grid gap-2">
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Input
+                      id="currentPassword"
+                      name="currentPassword"
+                      type="password"
+                      required
+                    />
+                  </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <Input
-                  id="newPassword"
-                  name="newPassword"
-                  type="password"
-                  required
-                />
-              </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input
+                      id="newPassword"
+                      name="newPassword"
+                      type="password"
+                      required
+                    />
+                  </div>
 
-              <div className="grid gap-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type="password"
-                  required
-                />
-              </div>
+                  <div className="grid gap-2">
+                    <Label htmlFor="confirmPassword">
+                      Confirm New Password
+                    </Label>
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type="password"
+                      required
+                    />
+                  </div>
 
-              <Button
-                type="submit"
-                disabled={isPasswordPending}
-                className="flex gap-2"
-              >
-                {isPasswordPending ? (
-                  <>Updating...</>
-                ) : (
-                  <>
-                    <Lock className="h-4 w-4" />
-                    Update Password
-                  </>
-                )}
-              </Button>
-            </form>
-          </CardContent>
-        </Card>
-      </div>
-    </div>
+                  <Button
+                    type="submit"
+                    disabled={isPasswordPending}
+                    className="flex gap-2"
+                  >
+                    {isPasswordPending ? (
+                      <>Updating...</>
+                    ) : (
+                      <>
+                        <Lock className="h-4 w-4" />
+                        Update Password
+                      </>
+                    )}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

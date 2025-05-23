@@ -1,18 +1,23 @@
 "use client"
 
 import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import {
   sendMessageToAI,
   saveConversation,
   saveMessage,
 } from "@/app/actions/conversations"
-import type { ChatActionResponse } from "@/app/actions/conversations"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/app/components/ui/button"
 import { Input } from "@/app/components/ui/input"
-import { ArrowLeft, Send, User, MoreHorizontal } from "lucide-react"
+import {
+  ArrowLeft,
+  Send,
+  FileText,
+  MoreHorizontal,
+  Settings,
+  Menu,
+} from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,21 +27,33 @@ import {
 } from "@/app/components/ui/dropdown-menu"
 import { ChatSidebar } from "@/app/components/chat-sidebar"
 import SignOutButton from "@/app/components/SignOutButton"
-import { useTheme } from "next-themes"
-import { Moon, Sun } from "lucide-react"
+import { ThemeToggle } from "@/app/components/theme-toggle"
+import { toast } from "sonner"
+import ReactMarkdown from "react-markdown"
+
+interface Message {
+  id?: string
+  sender: "user" | "ai"
+  text: string
+  timestamp?: Date
+}
 
 export default function ChatPage() {
   const { id } = useParams()
   const router = useRouter()
-  const [messages, setMessages] = useState<
-    { sender: "user" | "ai"; text: string | ChatActionResponse }[]
-  >([])
+  const searchParams = useSearchParams()
+  const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [loading, setLoading] = useState(false)
-  const [conversationId, setConversationId] = useState<string | null>(null)
+  const [conversationId, setConversationId] = useState<string | null>(
+    searchParams.get("conversation")
+  )
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [streamingMessage, setStreamingMessage] = useState("")
+  const [isStreaming, setIsStreaming] = useState(false)
+  const [documentName, setDocumentName] = useState("")
   const messagesEndRef = useRef<HTMLDivElement>(null)
-  const { theme, setTheme } = useTheme()
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -44,23 +61,74 @@ export default function ChatPage() {
 
   useEffect(() => {
     scrollToBottom()
-  }, [messages])
+  }, [messages, streamingMessage])
+
+  useEffect(() => {
+    // Focus input after streaming completes
+    if (!isStreaming && inputRef.current) {
+      inputRef.current.focus()
+    }
+  }, [isStreaming])
+
+  useEffect(() => {
+    // Fetch document name
+    async function fetchDocument() {
+      try {
+        const res = await fetch(`/api/documents/${id}`)
+        if (res.ok) {
+          const data = await res.json()
+          setDocumentName(data.document?.fileName || "Document")
+        }
+      } catch (error) {
+        console.error("Error fetching document:", error)
+      }
+    }
+    fetchDocument()
+  }, [id])
+
+  const simulateStreaming = (
+    text: string,
+    callback: (chunk: string) => void
+  ) => {
+    const words = text.split(" ")
+    let currentIndex = 0
+    let currentText = ""
+
+    const interval = setInterval(() => {
+      if (currentIndex < words.length) {
+        currentText += (currentIndex > 0 ? " " : "") + words[currentIndex]
+        callback(currentText)
+        currentIndex++
+      } else {
+        clearInterval(interval)
+      }
+    }, 50) // Adjust speed as needed
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!input.trim()) return
+    if (!input.trim() || loading) return
 
-    const userMessage = { sender: "user" as const, text: input }
+    const userMessage: Message = {
+      sender: "user",
+      text: input,
+      timestamp: new Date(),
+    }
     setMessages((prev) => [...prev, userMessage])
     setLoading(true)
+    setIsStreaming(true)
+    setStreamingMessage("")
+
+    const currentInput = input
     setInput("")
+
     const documentId = id as string
 
     try {
       // Create or get conversation ID
       let convId = conversationId
       if (!convId) {
-        const conversation = await saveConversation(documentId)
+        const conversation = await saveConversation(documentId, documentName)
         if (conversation.success && conversation.conversationId) {
           convId = conversation.conversationId
           setConversationId(convId)
@@ -69,118 +137,151 @@ export default function ChatPage() {
 
       // Save user message
       if (convId) {
-        await saveMessage(convId, "user", input)
+        await saveMessage(convId, "user", currentInput)
       }
 
       // Get AI response
-      const aiResponse = await sendMessageToAI(documentId, input)
+      const aiResponse = await sendMessageToAI(documentId, currentInput)
 
-      // Save AI message
-      if (
-        convId &&
-        aiResponse.success &&
-        typeof aiResponse.aiResponse === "string"
-      ) {
-        await saveMessage(convId, "assistant", aiResponse.aiResponse)
+      if (aiResponse.success && typeof aiResponse.aiResponse === "string") {
+        // Simulate streaming
+        simulateStreaming(aiResponse.aiResponse, (chunk) => {
+          setStreamingMessage(chunk)
+        })
+
+        // After streaming completes
+        setTimeout(() => {
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "ai",
+              text: aiResponse.aiResponse as string,
+              timestamp: new Date(),
+            },
+          ])
+          setStreamingMessage("")
+          setIsStreaming(false)
+
+          // Save AI message
+          if (convId) {
+            saveMessage(convId, "assistant", aiResponse.aiResponse as string)
+          }
+        }, aiResponse.aiResponse.split(" ").length * 50 + 100)
+      } else {
+        setMessages((prev) => [
+          ...prev,
+          {
+            sender: "ai",
+            text: "I apologize, but I couldn't process your request. Please try again.",
+            timestamp: new Date(),
+          },
+        ])
+        setIsStreaming(false)
       }
-
-      setMessages((prev) => [
-        ...prev,
-        { sender: "ai", text: aiResponse.aiResponse || "No response." },
-      ])
     } catch (err) {
+      console.error("Chat error:", err)
       setMessages((prev) => [
         ...prev,
-        { sender: "ai", text: "Error getting response." },
+        {
+          sender: "ai",
+          text: "I'm experiencing some technical difficulties. Please try again.",
+          timestamp: new Date(),
+        },
       ])
+      setIsStreaming(false)
+      toast.error("Failed to send message")
     } finally {
       setLoading(false)
     }
   }
 
-  const toggleTheme = () => {
-    setTheme(theme === "dark" ? "light" : "dark")
-  }
-
   return (
-    <div className="flex h-screen">
+    <div className="flex h-screen bg-background">
       {/* Chat Sidebar */}
       <ChatSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         currentDocumentId={id as string}
+        onConversationSelect={(convId) => {
+          setConversationId(convId)
+          router.push(`/chat/${id}?conversation=${convId}`)
+        }}
       />
 
       <div className="flex flex-col flex-1 h-full">
-        <div className="flex items-center justify-between gap-4 p-4 border-b">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => router.push("/dashboard")}
-            >
-              <ArrowLeft className="h-5 w-5" />
-            </Button>
-            <h1 className="text-xl font-semibold">DocuChat</h1>
+        {/* Header */}
+        <header className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
+          <div className="flex items-center justify-between gap-4 px-6 py-4">
+            <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => router.push("/dashboard")}
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <div className="flex items-center gap-3">
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                  <FileText className="h-4 w-4 text-primary-foreground" />
+                </div>
+                <div>
+                  <h1 className="font-semibold text-foreground">DocChat</h1>
+                  <p className="text-xs text-muted-foreground truncate max-w-48">
+                    {documentName}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setSidebarOpen(true)}
+                className="flex items-center gap-2"
+              >
+                <Menu className="h-4 w-4" />
+                Conversations
+              </Button>
+
+              <ThemeToggle />
+
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <MoreHorizontal className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+                    Dashboard
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    onClick={() => router.push("/user-profile")}
+                  >
+                    <Settings className="mr-2 h-4 w-4" />
+                    Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <SignOutButton />
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           </div>
+        </header>
 
-          <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={toggleTheme}
-              title={
-                theme === "dark"
-                  ? "Switch to light mode"
-                  : "Switch to dark mode"
-              }
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              )}
-            </Button>
-
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setSidebarOpen(true)}
-            >
-              Conversations
-            </Button>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon">
-                  <MoreHorizontal className="h-5 w-5" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => router.push("/dashboard")}>
-                  Dashboard
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/user-profile")}>
-                  Profile
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <SignOutButton />
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4 space-y-4">
-          {messages.length === 0 && (
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-500 space-y-4">
-              <div className="bg-primary/10 rounded-full p-4">
-                <User className="h-8 w-8 text-primary" />
+        {/* Messages */}
+        <div className="flex-1 overflow-y-auto p-6 space-y-6">
+          {messages.length === 0 && !isStreaming && (
+            <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+              <div className="bg-muted/50 rounded-full p-6">
+                <FileText className="h-12 w-12 text-muted-foreground" />
               </div>
               <div>
-                <p className="text-lg font-medium text-gray-700 dark:text-gray-300">
+                <p className="text-lg font-medium text-foreground mb-2">
                   Start a conversation
                 </p>
-                <p className="max-w-md">
+                <p className="text-muted-foreground max-w-md">
                   Ask questions about your document to get insights and
                   information.
                 </p>
@@ -196,48 +297,72 @@ export default function ChatPage() {
               }`}
             >
               <div
-                className={`max-w-[80%] rounded-lg px-4 py-3 ${
+                className={`max-w-[80%] rounded-2xl px-4 py-3 ${
                   msg.sender === "user"
                     ? "bg-primary text-primary-foreground"
-                    : "bg-muted"
+                    : "bg-muted text-foreground"
                 }`}
               >
-                {typeof msg.text === "string"
-                  ? msg.text
-                  : JSON.stringify(msg.text)}
+                {msg.sender === "ai" ? (
+                  <div className="prose prose-sm dark:prose-invert max-w-none">
+                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p>{msg.text}</p>
+                )}
               </div>
             </div>
           ))}
 
-          {loading && (
+          {/* Streaming message */}
+          {isStreaming && streamingMessage && (
             <div className="flex justify-start">
-              <div className="bg-muted rounded-lg px-4 py-3 max-w-[80%]">
+              <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-muted text-foreground">
+                <div className="prose prose-sm dark:prose-invert max-w-none">
+                  <ReactMarkdown>{streamingMessage}</ReactMarkdown>
+                </div>
+                <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />
+              </div>
+            </div>
+          )}
+
+          {/* Loading indicator */}
+          {loading && !streamingMessage && (
+            <div className="flex justify-start">
+              <div className="bg-muted rounded-2xl px-4 py-3 max-w-[80%]">
                 <div className="flex space-x-2">
-                  <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce"></div>
-                  <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:0.2s]"></div>
-                  <div className="h-2 w-2 rounded-full bg-gray-400 animate-bounce [animation-delay:0.4s]"></div>
+                  <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce"></div>
+                  <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.2s]"></div>
+                  <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.4s]"></div>
                 </div>
               </div>
             </div>
           )}
+
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="p-4 border-t">
-          <form onSubmit={handleSubmit} className="flex gap-2">
+        {/* Input */}
+        <div className="border-t border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 p-6">
+          <form onSubmit={handleSubmit} className="flex gap-3">
             <Input
+              ref={inputRef}
               name="message"
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Type your message…"
-              className="flex-1"
+              placeholder="Ask a question about your document..."
+              className="flex-1 bg-background"
               disabled={loading}
               autoComplete="off"
+              autoFocus
             />
-            <Button type="submit" disabled={loading || !input.trim()}>
-              <Send className="h-4 w-4 mr-2" />
-              Send
+            <Button
+              type="submit"
+              disabled={loading || !input.trim()}
+              size="icon"
+            >
+              <Send className="h-4 w-4" />
             </Button>
           </form>
         </div>

@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react"
 import { Button } from "@/app/components/ui/button"
 import { X, MessageSquare, FileText } from "lucide-react"
-import Link from "next/link"
 import { formatRelativeTime } from "@/lib/utils"
+import { Skeleton } from "@/app/components/ui/skeleton"
 
 type Conversation = {
   id: string
@@ -18,10 +18,12 @@ export function ChatSidebar({
   isOpen,
   onClose,
   currentDocumentId,
+  onConversationSelect,
 }: {
   isOpen: boolean
   onClose: () => void
   currentDocumentId: string
+  onConversationSelect?: (conversationId: string) => void
 }) {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(true)
@@ -30,7 +32,9 @@ export function ChatSidebar({
     async function fetchConversations() {
       try {
         setLoading(true)
-        const res = await fetch("/api/conversations")
+        const res = await fetch(
+          `/api/conversations?documentId=${currentDocumentId}`
+        )
         if (res.ok) {
           const data = await res.json()
           setConversations(data.conversations || [])
@@ -45,16 +49,25 @@ export function ChatSidebar({
     if (isOpen) {
       fetchConversations()
     }
-  }, [isOpen])
+  }, [isOpen, currentDocumentId])
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/50 md:bg-transparent md:inset-auto md:relative md:z-0">
-      <div className="absolute inset-y-0 left-0 w-3/4 max-w-xs bg-background border-r shadow-lg md:relative md:w-64 md:shadow-none">
+    <>
+      {/* Backdrop */}
+      <div
+        className="fixed inset-0 z-40 bg-black/50 md:hidden"
+        onClick={onClose}
+      />
+
+      {/* Sidebar */}
+      <div className="fixed inset-y-0 left-0 z-50 w-80 bg-card border-r border-border shadow-lg md:relative md:z-0">
         <div className="flex flex-col h-full">
-          <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="text-lg font-semibold">Conversations</h2>
+          <div className="flex items-center justify-between p-4 border-b border-border">
+            <h2 className="text-lg font-semibold text-foreground">
+              Conversations
+            </h2>
             <Button
               variant="ghost"
               size="icon"
@@ -65,49 +78,62 @@ export function ChatSidebar({
             </Button>
           </div>
 
-          <div className="flex-1 overflow-auto p-2">
+          <div className="flex-1 overflow-auto p-4">
             {loading ? (
-              <div className="flex justify-center p-4">
-                <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-primary"></div>
-              </div>
+              <ConversationsSkeleton />
             ) : conversations.length > 0 ? (
               <div className="space-y-2">
                 {conversations.map((conversation) => (
-                  <Link
+                  <button
                     key={conversation.id}
-                    href={`/chat/${conversation.documentId}?conversation=${conversation.id}`}
-                    className={`flex items-center gap-2 p-2 rounded-md hover:bg-muted transition-colors ${
-                      conversation.documentId === currentDocumentId
-                        ? "bg-muted"
-                        : ""
-                    }`}
+                    onClick={() => {
+                      onConversationSelect?.(conversation.id)
+                      onClose()
+                    }}
+                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors w-full text-left"
                   >
-                    <MessageSquare className="h-4 w-4 text-muted-foreground" />
+                    <MessageSquare className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate">
+                      <p className="text-sm font-medium truncate text-foreground">
                         {conversation.title || "Untitled Conversation"}
                       </p>
                       <p className="text-xs text-muted-foreground">
                         {formatRelativeTime(new Date(conversation.createdAt))}
                       </p>
                     </div>
-                  </Link>
+                  </button>
                 ))}
               </div>
             ) : (
               <div className="flex flex-col items-center justify-center h-full text-center p-4">
-                <FileText className="h-8 w-8 text-muted-foreground mb-2" />
+                <FileText className="h-12 w-12 text-muted-foreground mb-4" />
                 <p className="text-sm text-muted-foreground">
                   No conversations yet
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Start chatting to see your conversations here
                 </p>
               </div>
             )}
           </div>
         </div>
       </div>
+    </>
+  )
+}
 
-      {/* Backdrop for mobile */}
-      <div className="absolute inset-0 md:hidden" onClick={onClose}></div>
+function ConversationsSkeleton() {
+  return (
+    <div className="space-y-2">
+      {Array.from({ length: 5 }).map((_, i) => (
+        <div key={i} className="flex items-start gap-3 p-3">
+          <Skeleton className="h-4 w-4 mt-1 flex-shrink-0" />
+          <div className="flex-1 space-y-2">
+            <Skeleton className="h-4 w-full" />
+            <Skeleton className="h-3 w-16" />
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
