@@ -62,7 +62,10 @@ export function ChatSidebar({
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b border-border">
             <h2 className="text-lg font-semibold text-foreground">
-              Conversations
+              Conversations{" "}
+              <span className="text-xs text-muted-foreground">
+                (coming soon lol)
+              </span>
             </h2>
             <Button
               variant="ghost"

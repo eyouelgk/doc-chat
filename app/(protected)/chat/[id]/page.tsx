@@ -155,7 +155,6 @@ export default function ChatPage() {
           setStreamingMessage("")
           setIsStreaming(false)
 
-          // Save AI message
           if (convId) {
             saveMessage(convId, "assistant", aiResponse.aiResponse as string)
           }
@@ -261,97 +260,102 @@ export default function ChatPage() {
           </div>
         </header>
 
-        <div className="flex-1 overflow-y-auto p-6 space-y-6">
-          {messages.length === 0 && !isStreaming && (
-            <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
-              <div className="bg-muted/50 rounded-full p-6">
-                <FileText className="h-12 w-12 text-muted-foreground" />
+        <div className="flex-1 flex flex-col items-center">
+          <div className="w-full max-w-3xl flex-1 overflow-y-auto p-6 space-y-6">
+            {messages.length === 0 && !isStreaming && (
+              <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+                <div className="bg-muted/50 rounded-full p-6">
+                  <FileText className="h-12 w-12 text-muted-foreground" />
+                </div>
+                <div>
+                  <p className="text-lg font-medium text-foreground mb-2">
+                    Start a conversation
+                  </p>
+                  <p className="text-muted-foreground max-w-md">
+                    Ask questions about your document to get insights and
+                    information.
+                  </p>
+                </div>
               </div>
-              <div>
-                <p className="text-lg font-medium text-foreground mb-2">
-                  Start a conversation
-                </p>
-                <p className="text-muted-foreground max-w-md">
-                  Ask questions about your document to get insights and
-                  information.
-                </p>
-              </div>
-            </div>
-          )}
+            )}
 
-          {messages.map((msg, idx) => (
-            <div
-              key={idx}
-              className={`flex ${
-                msg.sender === "user" ? "justify-end" : "justify-start"
-              }`}
-            >
+            {messages.map((msg, idx) => (
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                  msg.sender === "user"
-                    ? "bg-primary text-primary-foreground"
-                    : "bg-muted text-foreground"
+                key={idx}
+                className={`flex ${
+                  msg.sender === "user" ? "justify-end" : "justify-start"
                 }`}
               >
-                {msg.sender === "ai" ? (
+                <div
+                  className={`max-w-[56%] rounded-2xl px-4 py-3 ${
+                    msg.sender === "user"
+                      ? "bg-primary text-primary-foreground"
+                      : "bg-muted text-foreground"
+                  }`}
+                >
+                  {msg.sender === "ai" ? (
+                    <div className="prose prose-sm dark:prose-invert max-w-none">
+                      <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    </div>
+                  ) : (
+                    <p>{msg.text}</p>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {isStreaming && streamingMessage && (
+              <div className="flex justify-start">
+                <div className="max-w-[56%] rounded-2xl px-4 py-3 bg-muted text-foreground">
                   <div className="prose prose-sm dark:prose-invert max-w-none">
-                    <ReactMarkdown>{msg.text}</ReactMarkdown>
+                    <ReactMarkdown>{streamingMessage}</ReactMarkdown>
                   </div>
-                ) : (
-                  <p>{msg.text}</p>
-                )}
-              </div>
-            </div>
-          ))}
-
-          {isStreaming && streamingMessage && (
-            <div className="flex justify-start">
-              <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-muted text-foreground">
-                <div className="prose prose-sm dark:prose-invert max-w-none">
-                  <ReactMarkdown>{streamingMessage}</ReactMarkdown>
-                </div>
-                <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />
-              </div>
-            </div>
-          )}
-
-          {loading && !streamingMessage && (
-            <div className="flex justify-start">
-              <div className="bg-muted rounded-2xl px-4 py-3 max-w-[80%]">
-                <div className="flex space-x-2">
-                  <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce"></div>
-                  <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.2s]"></div>
-                  <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.4s]"></div>
+                  <div className="inline-block w-2 h-4 bg-primary animate-pulse ml-1" />
                 </div>
               </div>
-            </div>
-          )}
+            )}
 
-          <div ref={messagesEndRef} />
-        </div>
+            {loading && !streamingMessage && (
+              <div className="flex justify-start">
+                <div className="bg-muted rounded-2xl px-4 py-3 max-w-[56%]">
+                  <div className="flex space-x-2">
+                    <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce"></div>
+                    <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.2s]"></div>
+                    <div className="h-2 w-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.4s]"></div>
+                  </div>
+                </div>
+              </div>
+            )}
 
-        <div className="border-t border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 p-6">
-          <form onSubmit={handleSubmit} className="flex gap-3">
-            <Input
-              ref={inputRef}
-              name="message"
-              type="text"
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask a question about your document..."
-              className="flex-1 bg-background"
-              disabled={loading}
-              autoComplete="off"
-              autoFocus
-            />
-            <Button
-              type="submit"
-              disabled={loading || !input.trim()}
-              size="icon"
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div
+            className="w-full max-w-3xl border-t border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 p-6 rounded-2xl mb-6 shadow-lg"
+            style={{ marginTop: "-1.5rem" }}
+          >
+            <form onSubmit={handleSubmit} className="flex gap-3">
+              <Input
+                ref={inputRef}
+                name="message"
+                type="text"
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                placeholder="Ask a question about your document..."
+                className="flex-1 bg-background"
+                disabled={loading}
+                autoComplete="off"
+                autoFocus
+              />
+              <Button
+                type="submit"
+                disabled={loading || !input.trim()}
+                size="icon"
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </form>
+          </div>
         </div>
       </div>
     </div>
