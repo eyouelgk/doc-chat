@@ -16,7 +16,7 @@ export default function SignOutButton() {
 
   return (
     <DropdownMenuItem onClick={handleSignOut} disabled={isPending}>
-      <LogOut className="mr-2 h-4 w-4" />
+      <LogOut className=" h-4 w-4" />
       <span>{isPending ? "Signing out..." : "Sign Out"}</span>
     </DropdownMenuItem>
   )

@@ -16,6 +16,11 @@ import { toast } from "react-hot-toast"
 import { ArrowLeft, Save, Lock, User } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/app/components/ui/skeleton"
+import { ThemeToggle } from "@/app/components/theme-toggle"
+import { LogOut } from "lucide-react"
+import { useTransition } from "react"
+import { signOut } from "@/app/actions/auth"
+import { DropdownMenuItem } from "@/app/components/ui/dropdown-menu"
 
 type UserType = {
   id: string
@@ -28,7 +33,6 @@ export default function ProfilePage() {
   const [user, setUser] = useState<UserType | null>(null)
   const [loading, setLoading] = useState(true)
 
-  // Profile update state
   const [state, formAction, isPending] = useActionState<
     { success: boolean; message: string },
     FormData
@@ -38,7 +42,6 @@ export default function ProfilePage() {
         const result = await updateUserProfile(formData)
         if (result.success) {
           toast.success(result.message)
-          // Refresh user data
           fetchUserData()
         } else {
           toast.error(result.message)
@@ -54,7 +57,6 @@ export default function ProfilePage() {
     { success: false, message: "" }
   )
 
-  // Password change state
   const [passwordState, passwordFormAction, isPasswordPending] = useActionState<
     { success: boolean; message: string },
     FormData
@@ -64,7 +66,6 @@ export default function ProfilePage() {
         const result = await changeUserPassword(formData)
         if (result.success) {
           toast.success(result.message)
-          // Reset form
           ;(
             document.getElementById("password-form") as HTMLFormElement
           )?.reset()
@@ -82,7 +83,6 @@ export default function ProfilePage() {
     { success: false, message: "" }
   )
 
-  // Fetch user data
   const fetchUserData = async () => {
     try {
       setLoading(true)
@@ -124,6 +124,15 @@ export default function ProfilePage() {
       </div>
     )
   }
+  function SignOutButton() {
+    const [isPending, startTransition] = useTransition()
+
+    const handleSignOut = () => {
+      startTransition(async () => {
+        await signOut()
+      })
+    }
+  }
 
   if (loading) {
     return <ProfileSkeleton />
@@ -135,13 +144,16 @@ export default function ProfilePage() {
         <ProfileSkeleton />
       ) : (
         <div className="container mx-auto px-4 py-8 max-w-3xl">
-          <div className="flex items-center gap-4 mb-8">
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/dashboard">
-                <ArrowLeft className="h-5 w-5" />
-              </Link>
-            </Button>
-            <h1 className="text-3xl font-bold">Your Profile</h1>
+          <div className="flex justify-between items-center mb-8">
+            <div className="flex  items-center gap-4 ">
+              <Button variant="ghost" size="icon" asChild>
+                <Link href="/dashboard">
+                  <ArrowLeft className="h-5 w-5" />
+                </Link>
+              </Button>
+              <h1 className="text-3xl font-bold">Your Profile</h1>
+            </div>
+            <ThemeToggle />
           </div>
 
           <div className="grid gap-8">
@@ -259,6 +271,18 @@ export default function ProfilePage() {
                 </form>
               </CardContent>
             </Card>
+
+            <div className="flex justify-end">
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  signOut()
+                }}
+              >
+                <LogOut className="h-4 w-4" />
+                <p>Sign Out</p>
+              </Button>
+            </div>
           </div>
         </div>
       )}

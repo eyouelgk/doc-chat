@@ -24,7 +24,6 @@ const initialState: ActionResponse = {
 export default function SignUpPage() {
   const router = useRouter()
 
-  // Use useActionState hook for the form submission action
   const [state, formAction, isPending] = useActionState<
     ActionResponse,
     FormData
@@ -32,7 +31,6 @@ export default function SignUpPage() {
     try {
       const result = await signUp(formData)
 
-      // Handle successful submission
       if (result.success) {
         toast.success("Account created successfully")
         router.push("/dashboard")

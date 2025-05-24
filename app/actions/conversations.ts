@@ -35,7 +35,6 @@ export async function sendMessageToAI(
       return { success: false, error: "Missing message" }
     }
 
-    // Enhanced prompt for better responses
     const enhancedPrompt = `Based on the document content, please answer the following question. 
     Provide a comprehensive and helpful response that draws from the document's information. 
     If the question relates to topics not covered in the document, you may provide general knowledge 

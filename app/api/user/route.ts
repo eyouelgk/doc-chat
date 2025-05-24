@@ -9,7 +9,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Return user data without sensitive information
     return NextResponse.json({
       user: {
         id: user.id,

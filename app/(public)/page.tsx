@@ -3,6 +3,7 @@
 import Link from "next/link"
 import { Button } from "@/app/components/ui/button"
 import { FileText, MessageSquare, User } from "lucide-react"
+import { ThemeToggle } from "@/app/components/theme-toggle"
 
 export default function Home() {
   return (
@@ -17,6 +18,7 @@ export default function Home() {
             <Button asChild>
               <Link href="/signup">Sign Up</Link>
             </Button>
+            <ThemeToggle />
           </div>
         </div>
       </header>

@@ -1,14 +1,15 @@
 "use client"
 
-import { UploadButton } from "@/lib/uploadthing"
+import { UploadDropzone } from "@/lib/uploadthing"
 import { useState } from "react"
 import { toast } from "sonner"
+import { Plus } from "lucide-react"
 
-export default function UploadButtonComponent() {
+export default function UploadDropzoneComponent() {
   const [isUploading, setIsUploading] = useState(false)
 
   return (
-    <UploadButton
+    <UploadDropzone
       endpoint="fileUploader"
       onUploadBegin={() => {
         setIsUploading(true)
@@ -23,6 +24,18 @@ export default function UploadButtonComponent() {
         toast.error(`Upload failed: ${error.message}`)
       }}
       content={{
+        label({ ready }) {
+          if (ready)
+            return (
+              <h3 className="text-xl font-semibold mb-2 text-foreground">
+                No documents found
+              </h3>
+            )
+          return "Getting ready..."
+        },
+        uploadIcon({ ready }) {
+          if (ready) return <Plus className="h-12 w-12 text-muted-foreground" />
+        },
         button({ ready, isUploading }) {
           if (isUploading) return "Uploading..."
           if (ready) return "Upload"
@@ -31,10 +44,15 @@ export default function UploadButtonComponent() {
         allowedContent({ ready, fileTypes, isUploading }) {
           if (!ready) return "Checking..."
           if (isUploading) return "Uploading..."
-          return `PDF, DOCX, TXT (up to 15MB)`
+          return (
+            <p className="text-muted-foreground mb-8 max-w-md">
+              Supported formats are PDF, DOCX, and TXT (up to 15MB).
+            </p>
+          )
         },
       }}
       appearance={{
+        label: "Upload a document",
         button:
           "px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2" +
           " " +

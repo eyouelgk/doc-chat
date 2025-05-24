@@ -26,6 +26,7 @@ import { ThemeToggle } from "@/app/components/theme-toggle"
 import SignOutButton from "../../components/SignOutButton"
 import RenameModal from "@/app/components/RenameModal"
 import ConfirmDialog from "@/app/components/ConfirmDialog"
+import UploadDropzoneComponent from "@/app/components/drop-zone"
 
 interface Document {
   id: string
@@ -190,7 +191,7 @@ export default function DashboardPage() {
             <div className="bg-card rounded-xl border border-border shadow-sm overflow-hidden">
               <div className="grid grid-cols-12 gap-4 px-6 py-4 text-sm font-medium text-muted-foreground bg-muted/50 border-b border-border">
                 <div className="col-span-5">Title</div>
-                <div className="col-span-3">Created</div>
+                <div className="col-span-3">Uploaded</div>
                 <div className="col-span-4 text-right">Actions</div>
               </div>
 
@@ -200,27 +201,21 @@ export default function DashboardPage() {
                     key={document.id}
                     className="grid grid-cols-12 gap-4 px-6 py-4 items-center hover:bg-muted/50 transition-colors"
                   >
-                    <div className="col-span-5 font-medium truncate flex items-center gap-3">
+                    <div className="col-span-5 flex items-center gap-3 font-medium truncate">
                       <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/20">
                         <FileText className="h-4 w-4 text-red-600 dark:text-red-400" />
                       </div>
-                      <span className="text-foreground">
+                      <Link
+                        href={`/chat/${document.id}`}
+                        className="text-foreground truncate"
+                      >
                         {document.fileName}
-                      </span>
+                      </Link>
                     </div>
                     <div className="col-span-3 text-sm text-muted-foreground">
                       {formatRelativeTime(new Date(document.createdAt))}
                     </div>
                     <div className="col-span-4 flex justify-end gap-2">
-                      <Button asChild variant="outline" size="sm">
-                        <Link
-                          href={`/chat/${document.id}`}
-                          className="flex items-center gap-2"
-                        >
-                          <MessageSquare className="h-4 w-4" />
-                          Chat
-                        </Link>
-                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <Button
@@ -319,18 +314,5 @@ function DocumentsSkeleton() {
 }
 
 function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="bg-muted/50 rounded-full p-6 mb-6">
-        <Plus className="h-12 w-12 text-muted-foreground" />
-      </div>
-      <h3 className="text-xl font-semibold mb-2 text-foreground">
-        No documents found
-      </h3>
-      <p className="text-muted-foreground mb-8 max-w-md">
-        Upload a document to get started. You can chat with your documents and
-        get insights from them.
-      </p>
-    </div>
-  )
+  return <UploadDropzoneComponent />
 }

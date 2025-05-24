@@ -15,17 +15,6 @@ const documentSchema = z.object({
   }),
 })
 
-// export async function createDocumentAndEmbeddings(
-//   userId: string,
-//   file: object
-// ) {
-//   const createdDocument = await createDocument(userId, file)
-//   const documentId = createdDocument.id!
-//   const filePath = createdDocument.filePath
-//   const embeddedChunks = await chunksAndEmbeddings(filePath)
-//   await createDocumentChunks(documentId, embeddedChunks)
-// }
-
 export async function createDocument(
   userId: string,
   file: object

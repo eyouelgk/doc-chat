@@ -11,7 +11,6 @@ import {
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
 
-// Define an enum for message roles (e.g., 'user', 'assistant')
 export const messageRoleEnum = pgEnum("message_role", [
   "user",
   "admin",
@@ -55,9 +54,10 @@ export const conversations = pgTable("conversations", {
   userId: uuid("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  documentId: uuid("document_id") // Optional: Link a conversation to a specific document
-    .references(() => documents.id, { onDelete: "set null" }),
-  title: varchar("title", { length: 255 }), // Optional: A title for the conversation
+  documentId: uuid("document_id").references(() => documents.id, {
+    onDelete: "set null",
+  }),
+  title: varchar("title", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 })
@@ -67,12 +67,11 @@ export const messages = pgTable("messages", {
   conversationId: uuid("conversation_id")
     .notNull()
     .references(() => conversations.id, { onDelete: "cascade" }),
-  role: messageRoleEnum("role").notNull(), // 'user' or 'assistant'
+  role: messageRoleEnum("role").notNull(),
   content: text("content").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 
-// Define relations for easier querying (optional but recommended)
 export const usersRelations = relations(users, ({ many }) => ({
   documents: many(documents),
   conversations: many(conversations),

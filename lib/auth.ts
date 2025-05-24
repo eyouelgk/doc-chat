@@ -129,7 +129,6 @@ export const getSession = cache(async () => {
 
     return payload ? { userId: payload.userId } : null
   } catch (error) {
-    // Handle the specific prerendering error
     if (
       error instanceof Error &&
       error.message.includes("During prerendering, `cookies()` rejects")

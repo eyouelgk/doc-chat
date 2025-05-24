@@ -11,7 +11,6 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user has admin role
     requireRole(user.role as UserRole, UserRole.ADMIN)
 
     const allUsers = await db.select().from(users)

@@ -3,7 +3,6 @@
 import { cn } from "@/lib/utils"
 import React, { forwardRef } from "react"
 
-// Form
 interface FormProps extends React.FormHTMLAttributes<HTMLFormElement> {
   children: React.ReactNode
 }
@@ -16,7 +15,6 @@ export function Form({ className, children, ...props }: FormProps) {
   )
 }
 
-// Form Group
 interface FormGroupProps extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode
 }
@@ -29,7 +27,6 @@ export function FormGroup({ className, children, ...props }: FormGroupProps) {
   )
 }
 
-// Form Label
 interface FormLabelProps extends React.LabelHTMLAttributes<HTMLLabelElement> {
   children: React.ReactNode
 }
@@ -48,7 +45,6 @@ export function FormLabel({ className, children, ...props }: FormLabelProps) {
   )
 }
 
-// Form Input
 type FormInputProps = React.InputHTMLAttributes<HTMLInputElement>
 
 export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
@@ -67,7 +63,6 @@ export const FormInput = forwardRef<HTMLInputElement, FormInputProps>(
 )
 FormInput.displayName = "FormInput"
 
-// Form Textarea
 type FormTextareaProps = React.TextareaHTMLAttributes<HTMLTextAreaElement>
 
 export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
@@ -86,7 +81,6 @@ export const FormTextarea = forwardRef<HTMLTextAreaElement, FormTextareaProps>(
 )
 FormTextarea.displayName = "FormTextarea"
 
-// Form Select
 interface FormSelectProps
   extends React.SelectHTMLAttributes<HTMLSelectElement> {
   options?: Array<{ label: string; value: string }>
@@ -116,7 +110,6 @@ export const FormSelect = forwardRef<HTMLSelectElement, FormSelectProps>(
 )
 FormSelect.displayName = "FormSelect"
 
-// Form Error
 interface FormErrorProps extends React.HTMLAttributes<HTMLParagraphElement> {
   children: React.ReactNode
 }
@@ -129,7 +122,6 @@ export function FormError({ className, children, ...props }: FormErrorProps) {
   )
 }
 
-// Form Description
 interface FormDescriptionProps
   extends React.HTMLAttributes<HTMLParagraphElement> {
   children: React.ReactNode

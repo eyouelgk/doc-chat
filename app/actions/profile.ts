@@ -7,12 +7,10 @@ import { eq } from "drizzle-orm"
 import { getCurrentUser } from "@/lib/get-data"
 import { hashPassword, verifyPassword } from "@/lib/auth"
 
-// Define Zod schema for profile update validation
 const ProfileUpdateSchema = z.object({
   userName: z.string().min(1, "Name is required"),
 })
 
-// Define Zod schema for password change validation
 const PasswordChangeSchema = z
   .object({
     currentPassword: z.string().min(1, "Current password is required"),
@@ -44,12 +42,10 @@ export async function updateUserProfile(
       }
     }
 
-    // Extract data from form
     const data = {
       userName: formData.get("userName") as string,
     }
 
-    // Validate with Zod
     const validationResult = ProfileUpdateSchema.safeParse(data)
     if (!validationResult.success) {
       return {
@@ -59,7 +55,6 @@ export async function updateUserProfile(
       }
     }
 
-    // Update user profile
     await db
       .update(users)
       .set({
@@ -93,14 +88,12 @@ export async function changeUserPassword(
       }
     }
 
-    // Extract data from form
     const data = {
       currentPassword: formData.get("currentPassword") as string,
       newPassword: formData.get("newPassword") as string,
       confirmPassword: formData.get("confirmPassword") as string,
     }
 
-    // Validate with Zod
     const validationResult = PasswordChangeSchema.safeParse(data)
     if (!validationResult.success) {
       return {
@@ -110,7 +103,6 @@ export async function changeUserPassword(
       }
     }
 
-    // Verify current password
     const isPasswordValid = await verifyPassword(
       data.currentPassword,
       user.hashedPassword
@@ -122,10 +114,8 @@ export async function changeUserPassword(
       }
     }
 
-    // Hash new password
     const hashedPassword = await hashPassword(data.newPassword)
 
-    // Update user password
     await db
       .update(users)
       .set({

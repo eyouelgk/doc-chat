@@ -64,14 +64,12 @@ export default function ChatPage() {
   }, [messages, streamingMessage])
 
   useEffect(() => {
-    // Focus input after streaming completes
     if (!isStreaming && inputRef.current) {
       inputRef.current.focus()
     }
   }, [isStreaming])
 
   useEffect(() => {
-    // Fetch document name
     async function fetchDocument() {
       try {
         const res = await fetch(`/api/documents/${id}`)
@@ -102,7 +100,7 @@ export default function ChatPage() {
       } else {
         clearInterval(interval)
       }
-    }, 50) // Adjust speed as needed
+    }, 50)
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -125,7 +123,6 @@ export default function ChatPage() {
     const documentId = id as string
 
     try {
-      // Create or get conversation ID
       let convId = conversationId
       if (!convId) {
         const conversation = await saveConversation(documentId, documentName)
@@ -135,21 +132,17 @@ export default function ChatPage() {
         }
       }
 
-      // Save user message
       if (convId) {
         await saveMessage(convId, "user", currentInput)
       }
 
-      // Get AI response
       const aiResponse = await sendMessageToAI(documentId, currentInput)
 
       if (aiResponse.success && typeof aiResponse.aiResponse === "string") {
-        // Simulate streaming
         simulateStreaming(aiResponse.aiResponse, (chunk) => {
           setStreamingMessage(chunk)
         })
 
-        // After streaming completes
         setTimeout(() => {
           setMessages((prev) => [
             ...prev,
@@ -197,7 +190,6 @@ export default function ChatPage() {
 
   return (
     <div className="flex h-screen bg-background">
-      {/* Chat Sidebar */}
       <ChatSidebar
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
@@ -209,7 +201,6 @@ export default function ChatPage() {
       />
 
       <div className="flex flex-col flex-1 h-full">
-        {/* Header */}
         <header className="border-b border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50">
           <div className="flex items-center justify-between gap-4 px-6 py-4">
             <div className="flex items-center gap-4">
@@ -219,6 +210,16 @@ export default function ChatPage() {
                 onClick={() => router.push("/dashboard")}
               >
                 <ArrowLeft className="h-5 w-5" />
+              </Button>
+              <Button
+                variant={sidebarOpen ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setSidebarOpen((open) => !open)}
+                className={`flex items-center gap-2 ${
+                  sidebarOpen ? "bg-muted" : ""
+                }`}
+              >
+                <Menu className="h-4 w-4" />
               </Button>
               <div className="flex items-center gap-3">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
@@ -234,16 +235,6 @@ export default function ChatPage() {
             </div>
 
             <div className="flex items-center gap-2">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setSidebarOpen(true)}
-                className="flex items-center gap-2"
-              >
-                <Menu className="h-4 w-4" />
-                Conversations
-              </Button>
-
               <ThemeToggle />
 
               <DropdownMenu>
@@ -270,7 +261,6 @@ export default function ChatPage() {
           </div>
         </header>
 
-        {/* Messages */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           {messages.length === 0 && !isStreaming && (
             <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
@@ -314,7 +304,6 @@ export default function ChatPage() {
             </div>
           ))}
 
-          {/* Streaming message */}
           {isStreaming && streamingMessage && (
             <div className="flex justify-start">
               <div className="max-w-[80%] rounded-2xl px-4 py-3 bg-muted text-foreground">
@@ -326,7 +315,6 @@ export default function ChatPage() {
             </div>
           )}
 
-          {/* Loading indicator */}
           {loading && !streamingMessage && (
             <div className="flex justify-start">
               <div className="bg-muted rounded-2xl px-4 py-3 max-w-[80%]">
@@ -342,7 +330,6 @@ export default function ChatPage() {
           <div ref={messagesEndRef} />
         </div>
 
-        {/* Input */}
         <div className="border-t border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 p-6">
           <form onSubmit={handleSubmit} className="flex gap-3">
             <Input

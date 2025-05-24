@@ -32,9 +32,7 @@ export function ChatSidebar({
     async function fetchConversations() {
       try {
         setLoading(true)
-        const res = await fetch(
-          `/api/conversations?documentId=${currentDocumentId}`
-        )
+        const res = await fetch(`/api/conversations/${currentDocumentId}`)
         if (res.ok) {
           const data = await res.json()
           setConversations(data.conversations || [])
@@ -55,13 +53,11 @@ export function ChatSidebar({
 
   return (
     <>
-      {/* Backdrop */}
       <div
         className="fixed inset-0 z-40 bg-black/50 md:hidden"
         onClick={onClose}
       />
 
-      {/* Sidebar */}
       <div className="fixed inset-y-0 left-0 z-50 w-80 bg-card border-r border-border shadow-lg md:relative md:z-0">
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b border-border">
