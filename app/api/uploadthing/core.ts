@@ -11,6 +11,9 @@ export const ourFileRouter = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
       maxFileSize: "16MB",
     },
+    "text/markdown": { maxFileSize: "16MB" },
+    "text/plain": { maxFileSize: "16MB" },
+    "text/html": { maxFileSize: "16MB" },
 
     text: { maxFileSize: "16MB" },
   })

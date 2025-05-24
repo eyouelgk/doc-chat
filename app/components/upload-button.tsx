@@ -38,11 +38,11 @@ export default function UploadButtonComponent() {
         button:
           "px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2" +
           " " +
-          "hover:opacity-90" +
+          "hover:opacity-90 ut-uploading:cursor-not-allowed " +
           " " +
-          "bg-[var(--foreground)] text-[var(--background)] ut-button:data-[state=uploading]:bg-[var(--foreground)]" +
+          "ut-ready:bg-[var(--foreground)]  text-[var(--background)] ut-readying:bg-zinc-950/10  ut-uploading:bg-zinc-950/50 ut-uploading:after:bg-[var(--foreground)]/90  after:bg-[var(--background)]" +
           " " +
-          "dark:bg-[var(--foreground)] dark:text-[var(--background)]  dark:ut-button:data-[state=uploading]:bg-[var(--foreground)]",
+          "dark:text-[var(--background)] dark:ut-ready:bg-[var(--foreground)] dark:ut-uploading:bg-[var(--foreground)]/50 dark:ut-uploading:after:bg-[var(--background)]/90 dark:ut-uploading:text-red-500",
         allowedContent: "text-xs text-muted-foreground mt-2",
       }}
     />
