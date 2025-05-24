@@ -40,9 +40,9 @@ export default function UploadButtonComponent() {
           " " +
           "hover:opacity-90" +
           " " +
-          "bg-[var(--foreground)] text-[var(--background)]" +
+          "bg-[var(--foreground)] text-[var(--background)] ut-button:data-[state=uploading]:bg-[var(--foreground)]" +
           " " +
-          "dark:bg-[var(--foreground)] dark:text-[var(--background)]",
+          "dark:bg-[var(--foreground)] dark:text-[var(--background)]  dark:ut-button:data-[state=uploading]:bg-[var(--foreground)]",
         allowedContent: "text-xs text-muted-foreground mt-2",
       }}
     />

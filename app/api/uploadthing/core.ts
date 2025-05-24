@@ -11,8 +11,7 @@ export const ourFileRouter = {
     "application/vnd.openxmlformats-officedocument.wordprocessingml.document": {
       maxFileSize: "16MB",
     },
-    // "application/vnd.ms-powerpoint": { maxFileSize: "15MB" },
-    // "application/vnd.openxmlformats-officedocument.presentationml.presentation": { maxFileSize: "15MB" },
+
     text: { maxFileSize: "16MB" },
   })
     .middleware(async ({ req }) => {
