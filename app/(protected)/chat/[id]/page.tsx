@@ -11,9 +11,10 @@ import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/app/components/ui/button"
 import { Input } from "@/app/components/ui/input"
 import {
-  ArrowLeft,
+  Plus,
   Send,
   FileText,
+  LayoutDashboard,
   MoreHorizontal,
   Settings,
   Menu,
@@ -204,13 +205,6 @@ export default function ChatPage() {
           <div className="flex items-center justify-between gap-4 px-6 py-4">
             <div className="flex items-center gap-4">
               <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.push("/dashboard")}
-              >
-                <ArrowLeft className="h-5 w-5" />
-              </Button>
-              <Button
                 variant={sidebarOpen ? "secondary" : "ghost"}
                 size="sm"
                 onClick={() => setSidebarOpen((open) => !open)}
@@ -220,12 +214,32 @@ export default function ChatPage() {
               >
                 <Menu className="h-4 w-4" />
               </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+                onClick={() => {
+                  setConversationId(null)
+                  setMessages([])
+                  router.push(`/chat/${id}`) // resets conversation
+                }}
+              >
+                <Plus className="h-4 w-4" />
+              </Button>
               <div className="flex items-center gap-3">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
+                <a
+                  href="/dashboard"
+                  className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary"
+                >
                   <FileText className="h-4 w-4 text-primary-foreground" />
-                </div>
+                </a>
                 <div>
-                  <h1 className="font-semibold text-foreground">DocChat</h1>
+                  <a
+                    href="/dashboard"
+                    className="font-semibold text-foreground hover:underline focus:underline outline-none"
+                  >
+                    DocChat
+                  </a>
                   <p className="text-xs text-muted-foreground truncate max-w-48">
                     {documentName}
                   </p>
@@ -244,6 +258,7 @@ export default function ChatPage() {
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => router.push("/dashboard")}>
+                    <LayoutDashboard className="mr-2 h-4 w-4" />
                     Dashboard
                   </DropdownMenuItem>
                   <DropdownMenuItem
