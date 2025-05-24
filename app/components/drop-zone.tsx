@@ -59,9 +59,9 @@ export default function UploadDropzoneComponent() {
           " " +
           "hover:opacity-90 ut-uploading:cursor-not-allowed " +
           " " +
-          "ut-ready:bg-[var(--foreground)]  text-[var(--background)] ut-readying:bg-zinc-950/10  ut-uploading:bg-zinc-950/50 ut-uploading:after:bg-[var(--foreground)]/90 ut-uploading:text-[var(--foreground)] after:bg-green-500" +
+          "ut-ready:bg-[var(--foreground)] ut-ready:text-[var(--background)] ut-readying:bg-zinc-950/10 ut-uploading:bg-zinc-950 ut-uploading:after:bg-zinc-950/10 ut-uploading:text-[var(--background)] ut-uploading:after:text-[var(--background)] after:bg-zinc-950/10" +
           " " +
-          "dark:ut-ready:bg-[var(--foreground)] dark:text-[var(--background)] dark:ut-readying:bg-[var(--background)]/10 dark:ut-uploading:bg-[var(--foreground)]/50 dark:ut-uploading:after:bg-[var(--background)]/90 dark:ut-uploading:text-[var(--foreground)] dark:after:bg-green-500",
+          "dark:ut-ready:bg-[var(--foreground)] dark:ut-ready:text-zinc-950 dark:ut-readying:bg-[var(--background)]/10 dark:ut-uploading:bg-[var(--foreground)] dark:ut-uploading:after:bg-zinc-950/10 dark:ut-uploading:text-zinc-950 dark:ut-uploading:after:text-zinc-950 dark:after:bg-zinc-950/10",
         allowedContent: "text-xs text-muted-foreground mt-2",
       }}
     />
