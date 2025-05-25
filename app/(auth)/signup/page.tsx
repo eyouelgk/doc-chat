@@ -54,7 +54,7 @@ export default function SignUpPage() {
 
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h1 className="text-center text-3xl font-extrabold text-foreground">
-          DocuChat
+          DocChat
         </h1>
         <h2 className="mt-2 text-center text-2xl font-bold text-foreground">
           Create a new account

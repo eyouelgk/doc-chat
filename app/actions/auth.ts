@@ -17,7 +17,7 @@ const SignInSchema = z.object({
 
 const SignUpSchema = z
   .object({
-    userName: z.string().min(1, "Name is required"),
+    name: z.string().min(1, "Name is required"),
     email: z.string().min(1, "Email is required").email("Invalid email format"),
     password: z.string().min(6, "Password must be at least 6 characters"),
     confirmPassword: z.string().min(1, "Please confirm your password"),
@@ -98,7 +98,7 @@ export async function signIn(formData: FormData): Promise<ActionResponse> {
 export async function signUp(formData: FormData): Promise<ActionResponse> {
   try {
     const data = {
-      userName: formData.get("userName") as string,
+      name: formData.get("name") as string,
       email: formData.get("email") as string,
       password: formData.get("password") as string,
       confirmPassword: formData.get("confirmPassword") as string,
@@ -124,7 +124,7 @@ export async function signUp(formData: FormData): Promise<ActionResponse> {
       }
     }
 
-    const user = await createUser(data.userName, data.email, data.password)
+    const user = await createUser(data.name, data.email, data.password)
     if (!user) {
       return {
         success: false,

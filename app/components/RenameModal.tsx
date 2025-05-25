@@ -1,3 +1,4 @@
+"use client"
 import { useEffect, useRef, useState } from "react"
 import * as Dialog from "@radix-ui/react-dialog"
 import { Button } from "./ui/button"

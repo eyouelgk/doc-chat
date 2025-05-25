@@ -8,7 +8,7 @@ import { getCurrentUser } from "@/lib/get-data"
 import { hashPassword, verifyPassword } from "@/lib/auth"
 
 const ProfileUpdateSchema = z.object({
-  userName: z.string().min(1, "Name is required"),
+  name: z.string().min(1, "Name is required"),
 })
 
 const PasswordChangeSchema = z
@@ -43,7 +43,7 @@ export async function updateUserProfile(
     }
 
     const data = {
-      userName: formData.get("userName") as string,
+      name: formData.get("name") as string,
     }
 
     const validationResult = ProfileUpdateSchema.safeParse(data)
@@ -58,7 +58,7 @@ export async function updateUserProfile(
     await db
       .update(users)
       .set({
-        userName: data.userName,
+        name: data.name,
         updatedAt: new Date(),
       })
       .where(eq(users.id, user.id))

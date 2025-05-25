@@ -20,12 +20,11 @@ import { ThemeToggle } from "@/app/components/theme-toggle"
 import { LogOut } from "lucide-react"
 import { useTransition } from "react"
 import { signOut } from "@/app/actions/auth"
-import { DropdownMenuItem } from "@/app/components/ui/dropdown-menu"
 
 type UserType = {
   id: string
   email: string
-  userName: string | null
+  name: string | null
   createdAt: string
 }
 
@@ -86,7 +85,7 @@ export default function ProfilePage() {
   const fetchUserData = async () => {
     try {
       setLoading(true)
-      const response = await fetch("/api/user")
+      const response = await fetch("/api/users/me")
       if (response.ok) {
         const data = await response.json()
         setUser(data.user)
@@ -123,15 +122,6 @@ export default function ProfilePage() {
         </div>
       </div>
     )
-  }
-  function SignOutButton() {
-    const [isPending, startTransition] = useTransition()
-
-    const handleSignOut = () => {
-      startTransition(async () => {
-        await signOut()
-      })
-    }
   }
 
   if (loading) {
@@ -182,11 +172,11 @@ export default function ProfilePage() {
                   </div>
 
                   <div className="grid gap-2">
-                    <Label htmlFor="userName">Name</Label>
+                    <Label htmlFor="name">Name</Label>
                     <Input
-                      id="userName"
-                      name="userName"
-                      defaultValue={user?.userName || ""}
+                      id="name"
+                      name="name"
+                      defaultValue={user?.name || ""}
                       placeholder="Your name"
                     />
                   </div>

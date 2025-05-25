@@ -32,7 +32,9 @@ export function ChatSidebar({
     async function fetchConversations() {
       try {
         setLoading(true)
-        const res = await fetch(`/api/conversations/${currentDocumentId}`)
+        const res = await fetch(
+          `/api/conversations?documentId=${currentDocumentId}`
+        )
         if (res.ok) {
           const data = await res.json()
           setConversations(data.conversations || [])

@@ -21,7 +21,7 @@ export const users = pgTable("users", {
   id: uuid("id").primaryKey().defaultRandom(),
   hashedPassword: text("hashed_password").notNull(),
   email: varchar("email", { length: 255 }).notNull().unique(),
-  userName: varchar("name", { length: 255 }),
+  name: varchar("name", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   role: messageRoleEnum("role").notNull().default("user"),

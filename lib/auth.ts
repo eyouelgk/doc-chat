@@ -26,7 +26,7 @@ export async function verifyPassword(password: string, hashedPassword: string) {
   return compare(password, hashedPassword)
 }
 export async function createUser(
-  userName: string,
+  name: string,
   email: string,
   password: string
 ) {
@@ -35,11 +35,12 @@ export async function createUser(
   try {
     await db.insert(users).values({
       id,
-      userName,
       email,
       hashedPassword,
+      name,
     })
-    return { id, userName, email }
+
+    return { id, name, email }
   } catch (error) {
     console.error("Error creating user:", error)
     return null

@@ -10,7 +10,7 @@ export default function Home() {
     <div className="min-h-screen flex flex-col">
       <header className="border-b py-4">
         <div className="container mx-auto px-4 flex justify-between items-center">
-          <h1 className="text-2xl font-bold">DocuChat</h1>
+          <h1 className="text-2xl font-bold">DocChat</h1>
           <div className="flex gap-4">
             <Button asChild variant="outline">
               <Link href="/login">Sign In</Link>
@@ -83,7 +83,7 @@ export default function Home() {
 
       <footer className="border-t py-8">
         <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
-          <p>© {new Date().getFullYear()} DocuChat. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} DocChat. All rights reserved.</p>
         </div>
       </footer>
     </div>

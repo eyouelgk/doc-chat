@@ -1,3 +1,5 @@
+"use client"
+
 import { Button } from "./ui/button"
 
 interface ConfirmDialogProps {
@@ -10,8 +12,8 @@ interface ConfirmDialogProps {
 
 export default function ConfirmDialog({
   open,
-  title = "Are you sure?",
-  description = "This action cannot be undone.",
+  title = "Delete Document",
+  description = "Are you sure you want to delete this document? This action cannot be undone.",
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
