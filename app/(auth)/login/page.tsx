@@ -89,7 +89,11 @@ export default function SignInPage() {
                 className={state?.errors?.email ? "border-destructive" : ""}
               />
               {state?.errors?.email?.map((err, i) => (
-                <p key={i} id="email-error" className="text-sm text-destructive">
+                <p
+                  key={i}
+                  id="email-error"
+                  className="text-sm text-destructive"
+                >
                   {err}
                 </p>
               ))}
@@ -108,7 +112,11 @@ export default function SignInPage() {
                 className={state?.errors?.password ? "border-destructive" : ""}
               />
               {state?.errors?.password?.map((err, i) => (
-                <p key={i} id="password-error" className="text-sm text-destructive">
+                <p
+                  key={i}
+                  id="password-error"
+                  className="text-sm text-destructive"
+                >
                   {err}
                 </p>
               ))}

@@ -3,12 +3,15 @@ import { getCurrentUser } from "@/lib/get-data"
 import { db } from "@/db"
 import { conversations } from "@/db/schema"
 import { eq, and, desc } from "drizzle-orm"
+import { withCORS } from "@/lib/cors"
 
 export async function GET(req: NextRequest) {
   try {
     const user = await getCurrentUser()
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return withCORS(
+        NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      )
     }
 
     const { searchParams } = new URL(req.url)
@@ -35,12 +38,14 @@ export async function GET(req: NextRequest) {
 
     const userConversations = await query
 
-    return NextResponse.json({ conversations: userConversations })
+    return withCORS(NextResponse.json({ conversations: userConversations }))
   } catch (error) {
     console.error("Error fetching conversations:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch conversations" },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json(
+        { error: "Failed to fetch conversations" },
+        { status: 500 }
+      )
     )
   }
 }

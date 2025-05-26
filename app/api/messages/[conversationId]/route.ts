@@ -1,5 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { getCurrentUser, getConversation, getMessages } from "@/lib/get-data"
+import { withCORS } from "@/lib/cors"
 
 export async function GET(
   req: NextRequest,
@@ -8,7 +9,9 @@ export async function GET(
   try {
     const user = await getCurrentUser()
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return withCORS(
+        NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      )
     }
 
     const { conversationId } = await params
@@ -16,24 +19,24 @@ export async function GET(
     const conversation = await getConversation(conversationId)
 
     if (!conversation) {
-      return NextResponse.json(
-        { error: "Conversation not found" },
-        { status: 404 }
+      return withCORS(
+        NextResponse.json({ error: "Conversation not found" }, { status: 404 })
       )
     }
 
     if (conversation.userId !== user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      return withCORS(
+        NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      )
     }
 
     const messages = await getMessages(conversationId)
 
-    return NextResponse.json({ messages })
+    return withCORS(NextResponse.json({ messages }))
   } catch (error) {
     console.error(`Error fetching messages:`, error)
-    return NextResponse.json(
-      { error: "Failed to fetch messages" },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: "Failed to fetch messages" }, { status: 500 })
     )
   }
 }

@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/get-data"
 import { db } from "@/db"
 import { documents } from "@/db/schema"
 import { eq } from "drizzle-orm"
+import { withCORS } from "@/lib/cors"
 
 export async function GET(
   req: NextRequest,
@@ -11,7 +12,9 @@ export async function GET(
   try {
     const user = await getCurrentUser()
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return withCORS(
+        NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      )
     }
 
     const { id } = await params
@@ -23,19 +26,22 @@ export async function GET(
       .limit(1)
 
     if (!document) {
-      return NextResponse.json({ error: "Document not found" }, { status: 404 })
+      return withCORS(
+        NextResponse.json({ error: "Document not found" }, { status: 404 })
+      )
     }
 
     if (document.userId !== user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      return withCORS(
+        NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      )
     }
 
-    return NextResponse.json({ document })
+    return withCORS(NextResponse.json({ document }))
   } catch (error) {
     console.error("Error fetching document:", error)
-    return NextResponse.json(
-      { error: "Failed to fetch document" },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: "Failed to fetch document" }, { status: 500 })
     )
   }
 }
@@ -47,7 +53,9 @@ export async function DELETE(
   try {
     const user = await getCurrentUser()
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return withCORS(
+        NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      )
     }
 
     const { id } = await params
@@ -59,21 +67,24 @@ export async function DELETE(
       .limit(1)
 
     if (!document) {
-      return NextResponse.json({ error: "Document not found" }, { status: 404 })
+      return withCORS(
+        NextResponse.json({ error: "Document not found" }, { status: 404 })
+      )
     }
 
     if (document.userId !== user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      return withCORS(
+        NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      )
     }
 
     await db.delete(documents).where(eq(documents.id, id))
 
-    return NextResponse.json({ success: true })
+    return withCORS(NextResponse.json({ success: true }))
   } catch (error) {
     console.error("Error deleting document:", error)
-    return NextResponse.json(
-      { error: "Failed to delete document" },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: "Failed to delete document" }, { status: 500 })
     )
   }
 }
@@ -84,14 +95,18 @@ export async function PATCH(
   try {
     const user = await getCurrentUser()
     if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      return withCORS(
+        NextResponse.json({ error: "Unauthorized" }, { status: 401 })
+      )
     }
 
     const { id } = await params
     const { fileName } = await req.json()
 
     if (!fileName) {
-      return NextResponse.json({ error: "Missing fileName" }, { status: 400 })
+      return withCORS(
+        NextResponse.json({ error: "Missing fileName" }, { status: 400 })
+      )
     }
 
     const [document] = await db
@@ -101,21 +116,24 @@ export async function PATCH(
       .limit(1)
 
     if (!document) {
-      return NextResponse.json({ error: "Document not found" }, { status: 404 })
+      return withCORS(
+        NextResponse.json({ error: "Document not found" }, { status: 404 })
+      )
     }
 
     if (document.userId !== user.id) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      return withCORS(
+        NextResponse.json({ error: "Unauthorized" }, { status: 403 })
+      )
     }
 
     await db.update(documents).set({ fileName }).where(eq(documents.id, id))
 
-    return NextResponse.json({ success: true })
+    return withCORS(NextResponse.json({ success: true }))
   } catch (error) {
     console.error("Error renaming document:", error)
-    return NextResponse.json(
-      { error: "Failed to rename document" },
-      { status: 500 }
+    return withCORS(
+      NextResponse.json({ error: "Failed to rename document" }, { status: 500 })
     )
   }
 }
