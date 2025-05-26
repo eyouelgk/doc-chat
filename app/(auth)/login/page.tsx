@@ -25,7 +25,7 @@ const initialState: ActionResponse = {
 export default function SignInPage() {
   const router = useRouter()
 
-  const [state, formAction, isPending] = useActionState<
+  const [rawState, formAction, isPending] = useActionState<
     ActionResponse,
     FormData
   >(async (prevState: ActionResponse, formData: FormData) => {
@@ -47,6 +47,9 @@ export default function SignInPage() {
       }
     }
   }, initialState)
+
+  // Ensure state is always defined
+  const state = rawState || initialState
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-background">
