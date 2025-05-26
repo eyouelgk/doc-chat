@@ -1,1 +1,0 @@
-ALTER TABLE "document_chunks" ALTER COLUMN "embeddings" SET DATA TYPE vector(768);

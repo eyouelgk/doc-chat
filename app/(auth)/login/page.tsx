@@ -88,11 +88,11 @@ export default function SignInPage() {
                 aria-describedby="email-error"
                 className={state?.errors?.email ? "border-destructive" : ""}
               />
-              {state?.errors?.email && (
-                <p id="email-error" className="text-sm text-destructive">
-                  {state.errors.email[0]}
+              {state?.errors?.email?.map((err, i) => (
+                <p key={i} id="email-error" className="text-sm text-destructive">
+                  {err}
                 </p>
-              )}
+              ))}
             </FormGroup>
 
             <FormGroup>
@@ -107,11 +107,11 @@ export default function SignInPage() {
                 aria-describedby="password-error"
                 className={state?.errors?.password ? "border-destructive" : ""}
               />
-              {state?.errors?.password && (
-                <p id="password-error" className="text-sm text-destructive">
-                  {state.errors.password[0]}
+              {state?.errors?.password?.map((err, i) => (
+                <p key={i} id="password-error" className="text-sm text-destructive">
+                  {err}
                 </p>
-              )}
+              ))}
             </FormGroup>
 
             <div>

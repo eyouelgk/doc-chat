@@ -5,57 +5,15 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1747509364056,
-      "tag": "0000_fearless_onslaught",
+      "when": 1748286079631,
+      "tag": "0000_sloppy_marvel_apes",
       "breakpoints": true
     },
     {
       "idx": 1,
       "version": "7",
-      "when": 1747509665127,
-      "tag": "0001_tiny_blink",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1747510125257,
-      "tag": "0002_motionless_green_goblin",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1747512869137,
-      "tag": "0003_furry_prodigy",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1747652407877,
-      "tag": "0004_pretty_wrecking_crew",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1747813278642,
-      "tag": "0005_damp_blue_shield",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1747819819012,
-      "tag": "0006_needy_morgan_stark",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1748010516299,
-      "tag": "0007_old_iron_lad",
+      "when": 1748288021232,
+      "tag": "0001_uneven_miss_america",
       "breakpoints": true
     }
   ]

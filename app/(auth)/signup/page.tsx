@@ -69,22 +69,22 @@ export default function SignUpPage() {
             )}
 
             <FormGroup>
-              <FormLabel htmlFor="userName">Full Name</FormLabel>
+              <FormLabel htmlFor="name">Full Name</FormLabel>
               <FormInput
-                id="userName"
-                name="userName"
+                id="name"
+                name="name"
                 type="text"
                 autoComplete="name"
                 required
                 disabled={isPending}
-                aria-describedby="userName-error"
-                className={state?.errors?.userName ? "border-red-500" : ""}
+                aria-describedby="name-error"
+                className={state?.errors?.name ? "border-red-500" : ""}
               />
-              {state?.errors?.userName && (
-                <p id="userName-error" className="text-sm text-red-500">
-                  {state.errors.userName[0]}
+              {state?.errors?.name?.map((err, i) => (
+                <p key={i} id="name-error" className="text-sm text-red-500">
+                  {err}
                 </p>
-              )}
+              ))}
             </FormGroup>
 
             <FormGroup>
@@ -99,11 +99,11 @@ export default function SignUpPage() {
                 aria-describedby="email-error"
                 className={state?.errors?.email ? "border-red-500" : ""}
               />
-              {state?.errors?.email && (
-                <p id="email-error" className="text-sm text-red-500">
-                  {state.errors.email[0]}
+              {state?.errors?.email?.map((err, i) => (
+                <p key={i} id="email-error" className="text-sm text-red-500">
+                  {err}
                 </p>
-              )}
+              ))}
             </FormGroup>
 
             <FormGroup>
@@ -118,11 +118,11 @@ export default function SignUpPage() {
                 aria-describedby="password-error"
                 className={state?.errors?.password ? "border-red-500" : ""}
               />
-              {state?.errors?.password && (
-                <p id="password-error" className="text-sm text-red-500">
-                  {state.errors.password[0]}
+              {state?.errors?.password?.map((err, i) => (
+                <p key={i} id="password-error" className="text-sm text-red-500">
+                  {err}
                 </p>
-              )}
+              ))}
             </FormGroup>
 
             <FormGroup>
@@ -139,11 +139,11 @@ export default function SignUpPage() {
                   state?.errors?.confirmPassword ? "border-red-500" : ""
                 }
               />
-              {state?.errors?.confirmPassword && (
-                <p id="confirmPassword-error" className="text-sm text-red-500">
-                  {state.errors.confirmPassword[0]}
+              {state?.errors?.confirmPassword?.map((err, i) => (
+                <p key={i} id="confirmPassword-error" className="text-sm text-red-500">
+                  {err}
                 </p>
-              )}
+              ))}
             </FormGroup>
 
             <div>

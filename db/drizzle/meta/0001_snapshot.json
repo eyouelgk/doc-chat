@@ -1,6 +1,6 @@
 {
-  "id": "2be4b55d-6fe4-419f-b560-78476928822a",
-  "prevId": "13f8ac89-0462-4080-ac1f-1862fd06c2aa",
+  "id": "fd178140-b641-456d-983d-52036adc0b98",
+  "prevId": "076911d0-3f49-4dd9-916e-79f98022d613",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -48,23 +48,7 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "conversation_user_id_idx": {
-          "name": "conversation_user_id_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "conversations_user_id_users_id_fk": {
           "name": "conversations_user_id_users_id_fk",
@@ -128,9 +112,9 @@
           "primaryKey": false,
           "notNull": true
         },
-        "embedding": {
-          "name": "embedding",
-          "type": "vector(1536)",
+        "embeddings": {
+          "name": "embeddings",
+          "type": "vector(768)",
           "primaryKey": false,
           "notNull": false
         },
@@ -142,23 +126,7 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "chunk_document_id_idx": {
-          "name": "chunk_document_id_idx",
-          "columns": [
-            {
-              "expression": "document_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "document_chunks_document_id_documents_id_fk": {
           "name": "document_chunks_document_id_documents_id_fk",
@@ -224,23 +192,7 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "document_user_id_idx": {
-          "name": "document_user_id_idx",
-          "columns": [
-            {
-              "expression": "user_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "documents_user_id_users_id_fk": {
           "name": "documents_user_id_users_id_fk",
@@ -300,23 +252,7 @@
           "default": "now()"
         }
       },
-      "indexes": {
-        "message_conversation_id_idx": {
-          "name": "message_conversation_id_idx",
-          "columns": [
-            {
-              "expression": "conversation_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {
         "messages_conversation_id_conversations_id_fk": {
           "name": "messages_conversation_id_conversations_id_fk",
@@ -349,6 +285,12 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "hashed_password": {
+          "name": "hashed_password",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
         "email": {
           "name": "email",
           "type": "varchar(255)",
@@ -374,25 +316,17 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "role": {
+          "name": "role",
+          "type": "message_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'user'"
         }
       },
-      "indexes": {
-        "email_idx": {
-          "name": "email_idx",
-          "columns": [
-            {
-              "expression": "email",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
+      "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
@@ -415,6 +349,7 @@
       "schema": "public",
       "values": [
         "user",
+        "admin",
         "assistant"
       ]
     }

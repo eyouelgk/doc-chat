@@ -1,4 +1,4 @@
-CREATE TYPE "public"."message_role" AS ENUM('user', 'assistant');--> statement-breakpoint
+CREATE TYPE "public"."message_role" AS ENUM('user', 'admin', 'assistant');--> statement-breakpoint
 CREATE TABLE "conversations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" uuid NOT NULL,
@@ -6,6 +6,15 @@ CREATE TABLE "conversations" (
 	"title" varchar(255),
 	"created_at" timestamp DEFAULT now() NOT NULL,
 	"updated_at" timestamp DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "document_chunks" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"document_id" uuid NOT NULL,
+	"chunk_text" text NOT NULL,
+	"chunk_index" integer NOT NULL,
+	"embeddings" vector(768),
+	"created_at" timestamp DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "documents" (
@@ -27,6 +36,7 @@ CREATE TABLE "messages" (
 --> statement-breakpoint
 CREATE TABLE "users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"hashed_password" text NOT NULL,
 	"email" varchar(255) NOT NULL,
 	"name" varchar(255),
 	"created_at" timestamp DEFAULT now() NOT NULL,
@@ -36,9 +46,6 @@ CREATE TABLE "users" (
 --> statement-breakpoint
 ALTER TABLE "conversations" ADD CONSTRAINT "conversations_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "conversations" ADD CONSTRAINT "conversations_document_id_documents_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."documents"("id") ON DELETE set null ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "document_chunks" ADD CONSTRAINT "document_chunks_document_id_documents_id_fk" FOREIGN KEY ("document_id") REFERENCES "public"."documents"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "documents" ADD CONSTRAINT "documents_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "messages" ADD CONSTRAINT "messages_conversation_id_conversations_id_fk" FOREIGN KEY ("conversation_id") REFERENCES "public"."conversations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
-CREATE UNIQUE INDEX "conversation_user_id_idx" ON "conversations" USING btree ("user_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "document_user_id_idx" ON "documents" USING btree ("user_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "message_conversation_id_idx" ON "messages" USING btree ("conversation_id");--> statement-breakpoint
-CREATE UNIQUE INDEX "email_idx" ON "users" USING btree ("email");
+ALTER TABLE "messages" ADD CONSTRAINT "messages_conversation_id_conversations_id_fk" FOREIGN KEY ("conversation_id") REFERENCES "public"."conversations"("id") ON DELETE cascade ON UPDATE no action;
