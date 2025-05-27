@@ -332,12 +332,12 @@ export default function ChatPage() {
           {messages.map((msg, idx) => (
             <div
               key={idx}
-              className={`flex ${
-                msg.sender === "user" ? "justify-end" : "justify-start"
+              className={`flex flex-col ${
+                msg.sender === "user" ? "items-end" : "items-start"
               }`}
             >
               <div
-                className={`relative max-w-[56%] rounded-2xl px-4 py-3 ${
+                className={`max-w-[56%] rounded-2xl px-4 py-3 ${
                   msg.sender === "user"
                     ? "bg-primary text-primary-foreground"
                     : "bg-muted text-foreground"
@@ -350,18 +350,18 @@ export default function ChatPage() {
                 ) : (
                   <p>{msg.text}</p>
                 )}
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute bottom-1 right-1 h-6 w-6 opacity-50 hover:opacity-100 transition-opacity mt-2"
-                  onClick={() => {
-                    navigator.clipboard.writeText(msg.text)
-                    toast.success("Message copied to clipboard!")
-                  }}
-                >
-                  <Copy className="h-3 w-3" />
-                </Button>
               </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 opacity-50 hover:opacity-100 transition-opacity mt-1"
+                onClick={() => {
+                  navigator.clipboard.writeText(msg.text)
+                  toast.success("Message copied to clipboard!")
+                }}
+              >
+                <Copy className="h-3 w-3" />
+              </Button>
             </div>
           ))}
 
