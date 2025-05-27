@@ -34,14 +34,41 @@ export async function generateVectorStore(
     throw new Error("No Document URL provided")
   }
   const documentContent = await parseDocumentFromUrl(url)
-  const chunks = await splitText(documentContent)
+  let chunks = await splitText(documentContent)
   if (chunks.length === 0) {
-    throw new Error("No valid document chunks found")
+    console.warn(
+      `No chunks generated for documentId: ${documentId} from url: ${url}`
+    )
+    throw new Error(
+      "No valid document chunks found after parsing and splitting."
+    )
   }
-  const id = [documentId]
-  await vectorStore.addDocuments(chunks, { ids: id })
-  if (chunks.length > 0 || !vectorStore) {
-    throw new Error("Vector store is not initialized")
+
+  chunks = chunks.map((chunk) => ({
+    ...chunk,
+    metadata: {
+      ...chunk.metadata,
+      document_id: documentId,
+    },
+  }))
+
+  try {
+    await vectorStore.addDocuments(chunks)
+    console.log(
+      `Successfully added ${chunks.length} chunks for documentId: ${documentId}`
+    )
+  } catch (error) {
+    console.error(
+      `Error adding documents to vector store for documentId: ${documentId}:`,
+      error
+    )
+    throw new Error("Failed to add documents to vector store.")
   }
+
+  if (!vectorStore) {
+    console.error("Vector store instance is unexpectedly not available.")
+    throw new Error("Vector store is not initialized or available.")
+  }
+
   return vectorStore
 }
