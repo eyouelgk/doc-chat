@@ -13,13 +13,15 @@ import { Label } from "@/app/components/ui/label"
 import { useActionState } from "react"
 import { updateUserProfile, changeUserPassword } from "@/app/actions/profile"
 import { toast } from "react-hot-toast"
-import { ArrowLeft, Save, Lock, User } from "lucide-react"
+import { ArrowLeft, Save, Lock, User, Trash2 } from "lucide-react"
 import Link from "next/link"
 import { Skeleton } from "@/app/components/ui/skeleton"
 import { ThemeToggle } from "@/app/components/theme-toggle"
 import { LogOut } from "lucide-react"
-import { useTransition } from "react"
 import { signOut } from "@/app/actions/auth"
+import { deleteUserAccount } from "@/app/actions/profile" // Import the new action
+import ConfirmDialog from "@/app/components/ConfirmDialog" // Import ConfirmDialog
+import { useRouter } from "next/navigation" // Import useRouter
 
 type UserType = {
   id: string
@@ -31,6 +33,9 @@ type UserType = {
 export default function ProfilePage() {
   const [user, setUser] = useState<UserType | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isDeleting, setIsDeleting] = useState(false) // State for delete loading
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const router = useRouter()
 
   const [state, formAction, isPending] = useActionState<
     { success: boolean; message: string },
@@ -126,6 +131,27 @@ export default function ProfilePage() {
 
   if (loading) {
     return <ProfileSkeleton />
+  }
+
+  const handleDeleteAccountConfirm = async () => {
+    setIsDeleting(true)
+    try {
+      const result = await deleteUserAccount()
+      if (result.success) {
+        toast.success(result.message || "Account deleted successfully.")
+        await signOut() // Sign out user
+        router.push("/login?message=Account+deleted") // Redirect to login
+      } else {
+        toast.error(result.message || "Failed to delete account.")
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "An unexpected error occurred."
+      )
+    } finally {
+      setIsDeleting(false)
+      setShowDeleteConfirm(false)
+    }
   }
 
   return (
@@ -262,6 +288,39 @@ export default function ProfilePage() {
               </CardContent>
             </Card>
 
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2 text-destructive">
+                  <Trash2 className="h-5 w-5" />
+                  Danger Zone
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <p className="mb-4 text-sm text-muted-foreground">
+                  Deleting your account is a permanent action and cannot be
+                  undone. All your data, including documents and conversations,
+                  will be removed.
+                </p>
+                <Button
+                  variant="destructive"
+                  onClick={() => {
+                    setShowDeleteConfirm(true) // Open confirmation dialog
+                  }}
+                  className="flex gap-2"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? (
+                    <>Deleting...</>
+                  ) : (
+                    <>
+                      <Trash2 className="h-4 w-4" />
+                      Delete My Account
+                    </>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
             <div className="flex justify-end">
               <Button
                 variant="destructive"
@@ -276,6 +335,16 @@ export default function ProfilePage() {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={showDeleteConfirm}
+        onConfirm={handleDeleteAccountConfirm}
+        title="Delete Account"
+        description="Are you sure you want to delete your account? This action is permanent and cannot be undone. All your data, including documents and conversations, will be removed."
+        onCancel={function (): void {
+          throw new Error("Function not implemented.")
+        }}
+      />
     </>
   )
 }

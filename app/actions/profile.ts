@@ -136,3 +136,38 @@ export async function changeUserPassword(
     }
   }
 }
+
+export async function deleteUserAccount(): Promise<ActionResponse> {
+  try {
+    const user = await getCurrentUser()
+    if (!user) {
+      return {
+        success: false,
+        message: "You must be logged in to delete your account",
+      }
+    }
+
+    // Perform the deletion
+    // This is a cascading delete due to foreign key constraints defined in the schema
+    // (e.g., documents, conversations, messages related to the user will be deleted)
+    await db.delete(users).where(eq(users.id, user.id))
+
+    // It's a good practice to also invalidate any sessions or tokens here
+    // if not handled automatically by your auth provider upon user deletion.
+    // For this example, signOut is called on the client-side after this action.
+
+    return {
+      success: true,
+      message: "Your account has been permanently deleted.",
+    }
+  } catch (error) {
+    console.error("Account deletion error:", error)
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "An error occurred while deleting your account",
+    }
+  }
+}
