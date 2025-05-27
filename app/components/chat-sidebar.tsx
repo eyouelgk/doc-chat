@@ -65,7 +65,7 @@ export function ChatSidebar({
       />
 
       <div className="fixed inset-y-0 left-0 z-50 w-80 bg-card border-r border-border shadow-lg md:relative md:z-0">
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full max-h-screen">
           <div className="flex items-center justify-between p-4 border-b border-border">
             <h2 className="text-lg font-semibold text-foreground">
               Conversations
