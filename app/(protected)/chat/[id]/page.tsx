@@ -382,10 +382,7 @@ export default function ChatPage() {
             <div ref={messagesEndRef} />
           </div>
 
-          <div
-            className="w-full max-w-3xl border-t border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 p-6 rounded-2xl mb-6 shadow-lg"
-            style={{ marginTop: "-1.5rem" }}
-          >
+          <div className="w-full max-w-3xl border-t border-border bg-card/50 backdrop-blur supports-[backdrop-filter]:bg-card/50 p-6 rounded-2xl mb-6 shadow-lg">
             <form onSubmit={handleSubmit} className="flex gap-3">
               <Input
                 ref={inputRef}
