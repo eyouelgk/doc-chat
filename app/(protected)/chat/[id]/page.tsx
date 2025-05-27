@@ -85,6 +85,43 @@ export default function ChatPage() {
     fetchDocument()
   }, [id])
 
+  // Add this new effect to load messages when conversation changes
+  useEffect(() => {
+    async function loadMessages() {
+      if (!conversationId) {
+        setMessages([])
+        return
+      }
+
+      try {
+        const res = await fetch(`/api/messages/${conversationId}`)
+        if (!res.ok) throw new Error("Failed to fetch messages")
+        const data = await res.json()
+        const formattedMessages = data.messages.map((msg: any) => ({
+          id: msg.id,
+          sender: msg.role === "assistant" ? "ai" : "user",
+          text: msg.content,
+          timestamp: new Date(msg.createdAt),
+        }))
+
+        // Sort messages by timestamp in ascending order
+        formattedMessages.sort(
+          (
+            a: { timestamp: { getTime: () => number } },
+            b: { timestamp: { getTime: () => number } }
+          ) => a.timestamp.getTime() - b.timestamp.getTime()
+        )
+
+        setMessages(formattedMessages)
+      } catch (error) {
+        console.error("Error loading messages:", error)
+        toast.error("Failed to load conversation messages")
+      }
+    }
+
+    loadMessages()
+  }, [conversationId])
+
   const simulateStreaming = (
     text: string,
     callback: (chunk: string) => void

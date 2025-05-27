@@ -27,28 +27,32 @@ export function ChatSidebar({
 }) {
   const [conversations, setConversations] = useState<Conversation[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     async function fetchConversations() {
+      if (!isOpen || !currentDocumentId) return
+
       try {
         setLoading(true)
+        setError(null)
         const res = await fetch(
           `/api/conversations?documentId=${currentDocumentId}`
         )
-        if (res.ok) {
-          const data = await res.json()
-          setConversations(data.conversations || [])
+        if (!res.ok) {
+          throw new Error("Failed to fetch conversations")
         }
+        const data = await res.json()
+        setConversations(data.conversations || [])
       } catch (error) {
         console.error("Error fetching conversations:", error)
+        setError("Failed to load conversations")
       } finally {
         setLoading(false)
       }
     }
 
-    if (isOpen) {
-      fetchConversations()
-    }
+    fetchConversations()
   }, [isOpen, currentDocumentId])
 
   if (!isOpen) return null
@@ -64,10 +68,7 @@ export function ChatSidebar({
         <div className="flex flex-col h-full">
           <div className="flex items-center justify-between p-4 border-b border-border">
             <h2 className="text-lg font-semibold text-foreground">
-              Conversations{" "}
-              <span className="text-xs text-muted-foreground">
-                (coming soon lol)
-              </span>
+              Conversations
             </h2>
             <Button
               variant="ghost"
@@ -82,6 +83,31 @@ export function ChatSidebar({
           <div className="flex-1 overflow-auto p-4">
             {loading ? (
               <ConversationsSkeleton />
+            ) : error ? (
+              <div className="flex flex-col items-center justify-center h-full text-center p-4">
+                <p className="text-sm text-destructive">{error}</p>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => {
+                    setLoading(true)
+                    setError(null)
+                    fetch(`/api/conversations?documentId=${currentDocumentId}`)
+                      .then((res) => res.json())
+                      .then((data) => {
+                        setConversations(data.conversations || [])
+                      })
+                      .catch((error) => {
+                        console.error("Error retrying fetch:", error)
+                        setError("Failed to load conversations")
+                      })
+                      .finally(() => setLoading(false))
+                  }}
+                  className="mt-2"
+                >
+                  Retry
+                </Button>
+              </div>
             ) : conversations.length > 0 ? (
               <div className="space-y-2">
                 {conversations.map((conversation) => (
