@@ -45,7 +45,7 @@ export const documentChunks = pgTable("document_chunks", {
     .references(() => documents.id, { onDelete: "cascade" }),
   chunkText: text("chunk_text").notNull(),
   chunkIndex: integer("chunk_index").notNull(),
-  embedding: vector("embeddings", { dimensions: 768 }),
+  embedding: vector("embedding", { dimensions: 768 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
 

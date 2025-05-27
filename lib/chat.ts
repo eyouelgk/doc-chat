@@ -11,11 +11,14 @@ import { ChatPromptTemplate } from "@langchain/core/prompts"
 import { StringOutputParser } from "@langchain/core/output_parsers"
 import dotenv from "dotenv"
 import { getDocument } from "./get-data"
-import { MemoryVectorStore } from "langchain/vectorstores/memory"
-import { parseDocumentFromUrl, splitText } from "./doc-processing"
+import { SupabaseVectorStore } from "@langchain/community/vectorstores/supabase"
+import { createClient } from "@supabase/supabase-js"
 dotenv.config()
 
 const GOOGLE_API_KEY = process.env.GOOGLE_API_KEY
+const SUPABASE_URL = process.env.SUPABASE_URL
+const SUPABASE_ANON_KEY = process.env.SUPABASE_ANON_KEY
+
 const model = new ChatGoogleGenerativeAI({
   model: "gemini-2.0-flash",
   temperature: 0,
@@ -27,19 +30,29 @@ const embeddings = new GoogleGenerativeAIEmbeddings({
   apiKey: GOOGLE_API_KEY,
 })
 
+const client = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!)
+
 export async function initiateChatWithDocument(documentId: string) {
   const document = await getDocument(documentId)
   if (!document) {
     throw new Error("Document not found")
   }
-  const filePath = document.filePath
-  const text = await parseDocumentFromUrl(filePath)
-  const chunks = await splitText(text)
 
-  const vectorStore = new MemoryVectorStore(embeddings)
-  await vectorStore.addDocuments(chunks)
+  const vectorStore = new SupabaseVectorStore(embeddings, {
+    client,
+    tableName: "document_chunks", // Ensure this table stores your chunks and embeddings
+    queryName: "match_documents", // This Supabase function should query 'document_chunks.embedding'
+    // and ideally support filtering if not handled by the retriever's filter.
+  })
 
-  const retriever = vectorStore.asRetriever(10)
+  // Create a retriever that filters by the specific documentId.
+  // Assumes 'document_id' is a column in your 'document_chunks' table.
+  const retriever = vectorStore.asRetriever({
+    filter: {
+      document_id: documentId,
+    },
+    k: 10, // Keep fetching 10 relevant chunks
+  })
 
   const outputParser = new StringOutputParser()
   const systemPrompt = `
@@ -47,7 +60,7 @@ You are DocChat, an expert AI assistant focused on delivering accurate, professi
 
 GUIDELINES:
 - Use information found in the CONTEXT below. You may add further elaboration but do not fabricate or go against the given context.
-- If the answer is not present in the context, respond: "I don't see information about that in the document."
+- If the answer is not present in the context, respond: "I dont see information about that in the document."
 - Keep responses clear, concise, and professional. Define terms or concepts if they are relevant to the question yet are not explicitly mentioned in the document.
 - Organize answers using markdown: use headings, bullet points, numbered lists, and paragraphs for readability.
 - Do not include any metadata or extraneous information in your response.
@@ -73,6 +86,9 @@ CONTEXT:
     model,
     outputParser,
   ])
-  console.log("Chain created successfully.")
+  console.log(
+    "Chain created successfully using existing vectors for document ID:",
+    documentId
+  )
   return chain
 }
