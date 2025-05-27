@@ -353,7 +353,7 @@ export default function ChatPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute bottom-1 right-1 h-6 w-6 opacity-50 hover:opacity-100 transition-opacity"
+                  className="absolute bottom-1 right-1 h-6 w-6 opacity-50 hover:opacity-100 transition-opacity mt-2"
                   onClick={() => {
                     navigator.clipboard.writeText(msg.text)
                     toast.success("Message copied to clipboard!")
