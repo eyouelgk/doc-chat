@@ -29,31 +29,54 @@ export function ChatSidebar({
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    async function fetchConversations() {
-      if (!isOpen || !currentDocumentId) return
-
-      try {
-        setLoading(true)
-        setError(null)
-        const res = await fetch(
-          `/api/conversations?documentId=${currentDocumentId}`
-        )
-        if (!res.ok) {
-          throw new Error("Failed to fetch conversations")
-        }
-        const data = await res.json()
-        setConversations(data.conversations || [])
-      } catch (error) {
-        console.error("Error fetching conversations:", error)
-        setError("Failed to load conversations")
-      } finally {
-        setLoading(false)
+  async function fetchConversationsData() {
+    if (!isOpen || !currentDocumentId) return
+    try {
+      setLoading(true)
+      setError(null)
+      const res = await fetch(
+        `/api/conversations?documentId=${currentDocumentId}`
+      )
+      if (!res.ok) {
+        throw new Error("Failed to fetch conversations")
       }
+      const data = await res.json()
+      setConversations(data.conversations || [])
+    } catch (error) {
+      console.error("Error fetching conversations:", error)
+      setError("Failed to load conversations")
+    } finally {
+      setLoading(false)
     }
+  }
 
-    fetchConversations()
+  useEffect(() => {
+    fetchConversationsData()
   }, [isOpen, currentDocumentId])
+
+  const handleDeleteConversation = async (conversationId: string) => {
+    try {
+      const res = await fetch(`/api/conversations/${conversationId}`, {
+        method: "DELETE",
+      })
+
+      if (!res.ok) {
+        setError("Failed to delete conversation. Please try again.")
+        fetchConversationsData() // Refetch to ensure UI consistency on error
+        return
+      }
+
+      setConversations((prevConversations) =>
+        prevConversations.filter(
+          (conversation) => conversation.id !== conversationId
+        )
+      )
+    } catch (error) {
+      console.error("Error deleting conversation:", error)
+      setError("An error occurred while deleting. Please try again.")
+      fetchConversationsData() // Refetch to ensure UI consistency on error
+    }
+  }
 
   if (!isOpen) return null
 
@@ -90,18 +113,7 @@ export function ChatSidebar({
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    setLoading(true)
-                    setError(null)
-                    fetch(`/api/conversations?documentId=${currentDocumentId}`)
-                      .then((res) => res.json())
-                      .then((data) => {
-                        setConversations(data.conversations || [])
-                      })
-                      .catch((error) => {
-                        console.error("Error retrying fetch:", error)
-                        setError("Failed to load conversations")
-                      })
-                      .finally(() => setLoading(false))
+                    fetchConversationsData() // Use the new function
                   }}
                   className="mt-2"
                 >
@@ -111,24 +123,40 @@ export function ChatSidebar({
             ) : conversations.length > 0 ? (
               <div className="space-y-2">
                 {conversations.map((conversation) => (
-                  <button
+                  <div
                     key={conversation.id}
-                    onClick={() => {
-                      onConversationSelect?.(conversation.id)
-                      onClose()
-                    }}
-                    className="flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors w-full text-left"
+                    className="flex items-center gap-2 group"
                   >
-                    <MessageSquare className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium truncate text-foreground">
-                        {conversation.title || "Untitled Conversation"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatRelativeTime(new Date(conversation.createdAt))}
-                      </p>
-                    </div>
-                  </button>
+                    <button
+                      onClick={() => {
+                        onConversationSelect?.(conversation.id)
+                        onClose()
+                      }}
+                      className="flex-1 flex items-start gap-3 p-3 rounded-lg hover:bg-muted transition-colors w-full text-left"
+                    >
+                      <MessageSquare className="h-4 w-4 text-muted-foreground mt-1 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate text-foreground">
+                          {conversation.title || "Untitled Conversation"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">
+                          {formatRelativeTime(new Date(conversation.createdAt))}
+                        </p>
+                      </div>
+                    </button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation() // Prevent card click
+                        handleDeleteConversation(conversation.id)
+                      }}
+                      aria-label="Delete conversation"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
                 ))}
               </div>
             ) : (
