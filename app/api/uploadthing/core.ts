@@ -30,14 +30,32 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       const userId = metadata.userId
-      const document = await createDocument(userId, file)
-      console.log(
-        "Document entry created for userId:",
-        userId,
-        "documentId:",
-        document.id
-      )
-      console.log("file url", file.ufsUrl)
+      let document // Declare document outside try block
+      try {
+        document = await createDocument(userId, file)
+        console.log(
+          "Document entry created for userId:",
+          userId,
+          "documentId:",
+          document.id
+        )
+        console.log("file url", file.ufsUrl)
+      } catch (error) {
+        console.error("Error creating document entry:", error)
+        // Stop further processing if document creation fails
+        // Optionally, rethrow or return a specific error structure if your framework expects it
+        return { error: "Failed to create document record" }
+      }
+
+      // Ensure document and document.id exist before proceeding
+      // This check is important because even if createDocument doesn't throw,
+      // it might (in some hypothetical scenario) return without a proper id.
+      if (!document || !document.id) {
+        console.error(
+          "Document creation succeeded but document or document ID is undefined."
+        )
+        return { error: "Failed to obtain valid document ID after creation." }
+      }
 
       try {
         const documentContent = await parseDocumentFromUrl(file.ufsUrl)
