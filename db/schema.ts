@@ -10,6 +10,7 @@ import {
   vector,
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
+import { metadata } from "@/app/layout"
 
 export const messageRoleEnum = pgEnum("message_role", [
   "user",
@@ -40,11 +41,8 @@ export const documents = pgTable("documents", {
 
 export const documentChunks = pgTable("document_chunks", {
   id: uuid("id").primaryKey().defaultRandom().notNull(),
-  documentId: uuid("document_id")
-    .notNull()
-    .references(() => documents.id, { onDelete: "cascade" }),
-  chunkText: text("chunk_text").notNull(),
-  chunkIndex: integer("chunk_index").notNull(),
+  documentId: text("metadata").notNull(),
+  content: text("content").notNull(),
   embedding: vector("embedding", { dimensions: 768 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 })
@@ -84,13 +82,6 @@ export const documentsRelations = relations(documents, ({ one, many }) => ({
   }),
   chunks: many(documentChunks),
   conversations: many(conversations),
-}))
-
-export const documentChunksRelations = relations(documentChunks, ({ one }) => ({
-  document: one(documents, {
-    fields: [documentChunks.documentId],
-    references: [documents.id],
-  }),
 }))
 
 export const conversationsRelations = relations(

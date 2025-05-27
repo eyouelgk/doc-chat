@@ -1,7 +1,5 @@
 import { fromBuffer } from "file-type"
 import { Document } from "langchain/document"
-import { TaskType } from "@google/generative-ai"
-import { GoogleGenerativeAIEmbeddings } from "@langchain/google-genai"
 import { RecursiveCharacterTextSplitter } from "langchain/text_splitter"
 import { PDFLoader } from "@langchain/community/document_loaders/fs/pdf"
 import { DocxLoader } from "@langchain/community/document_loaders/fs/docx"
@@ -9,12 +7,6 @@ import { TextLoader } from "langchain/document_loaders/fs/text"
 import { PPTXLoader } from "@langchain/community/document_loaders/fs/pptx"
 import dotenv from "dotenv"
 dotenv.config()
-
-export const embeddings = new GoogleGenerativeAIEmbeddings({
-  model: "text-embedding-004", // 768 dimensions
-  taskType: TaskType.RETRIEVAL_DOCUMENT,
-  apiKey: process.env.GOOGLE_API_KEY,
-})
 
 export async function parseDocumentFromUrl(url: string): Promise<Document> {
   const buffer = await fetch(url).then((res) => res.arrayBuffer())

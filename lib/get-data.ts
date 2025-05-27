@@ -113,15 +113,3 @@ export async function getDocuments(id: string) {
     throw new Error("Failed to fetch documents")
   }
 }
-export async function getDocumentChunks(documentId: string) {
-  try {
-    const result = await db.query.documentChunks.findMany({
-      where: eq(documentChunks.documentId, documentId),
-      orderBy: (documentChunks, { asc }) => [asc(documentChunks.chunkIndex)],
-    })
-    return result
-  } catch (error) {
-    console.error(`Error fetching document chunks for ${documentId}:`, error)
-    throw new Error("Failed to fetch document chunks")
-  }
-}

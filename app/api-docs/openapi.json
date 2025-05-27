@@ -11,7 +11,7 @@
   },
   "servers": [
     {
-      "url": "https://docu-chat-sable.vercel.app/api-docs/api",
+      "url": "https://doc-chat-w3kn.vercel.app/api",
       "description": "Production server"
     },
     {
