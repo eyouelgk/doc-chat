@@ -25,7 +25,7 @@ export async function initiateChatWithDocument(documentId: string) {
   }
   const retriever = vectorStore.asRetriever({
     filter: {
-      document_id: documentId,
+      metadata: documentId,
     },
     k: 10,
   })
