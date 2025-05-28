@@ -46,7 +46,6 @@ export default function SignUpPage() {
     }
   }, initialState)
 
-  // Ensure state is always defined
   const state = rawState || initialState
 
   return (
@@ -143,7 +142,11 @@ export default function SignUpPage() {
                 }
               />
               {state?.errors?.confirmPassword?.map((err, i) => (
-                <p key={i} id="confirmPassword-error" className="text-sm text-red-500">
+                <p
+                  key={i}
+                  id="confirmPassword-error"
+                  className="text-sm text-red-500"
+                >
                   {err}
                 </p>
               ))}

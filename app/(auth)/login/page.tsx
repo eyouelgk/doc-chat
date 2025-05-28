@@ -48,7 +48,6 @@ export default function SignInPage() {
     }
   }, initialState)
 
-  // Ensure state is always defined
   const state = rawState || initialState
 
   return (

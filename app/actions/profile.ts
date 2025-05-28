@@ -146,15 +146,7 @@ export async function deleteUserAccount(): Promise<ActionResponse> {
         message: "You must be logged in to delete your account",
       }
     }
-
-    // Perform the deletion
-    // This is a cascading delete due to foreign key constraints defined in the schema
-    // (e.g., documents, conversations, messages related to the user will be deleted)
     await db.delete(users).where(eq(users.id, user.id))
-
-    // It's a good practice to also invalidate any sessions or tokens here
-    // if not handled automatically by your auth provider upon user deletion.
-    // For this example, signOut is called on the client-side after this action.
 
     return {
       success: true,

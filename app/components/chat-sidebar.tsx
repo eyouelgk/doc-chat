@@ -62,7 +62,7 @@ export function ChatSidebar({
 
       if (!res.ok) {
         setError("Failed to delete conversation. Please try again.")
-        fetchConversationsData() // Refetch to ensure UI consistency on error
+        fetchConversationsData()
         return
       }
 
@@ -74,7 +74,7 @@ export function ChatSidebar({
     } catch (error) {
       console.error("Error deleting conversation:", error)
       setError("An error occurred while deleting. Please try again.")
-      fetchConversationsData() // Refetch to ensure UI consistency on error
+      fetchConversationsData()
     }
   }
 
@@ -113,7 +113,7 @@ export function ChatSidebar({
                   variant="ghost"
                   size="sm"
                   onClick={() => {
-                    fetchConversationsData() // Use the new function
+                    fetchConversationsData()
                   }}
                   className="mt-2"
                 >
@@ -149,7 +149,7 @@ export function ChatSidebar({
                       size="icon"
                       className="opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive flex-shrink-0"
                       onClick={(e) => {
-                        e.stopPropagation() // Prevent card click
+                        e.stopPropagation()
                         handleDeleteConversation(conversation.id)
                       }}
                       aria-label="Delete conversation"

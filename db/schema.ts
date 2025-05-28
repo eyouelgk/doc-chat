@@ -10,7 +10,6 @@ import {
   vector,
 } from "drizzle-orm/pg-core"
 import { relations } from "drizzle-orm"
-import { metadata } from "@/app/layout"
 
 export const messageRoleEnum = pgEnum("message_role", [
   "user",
@@ -41,7 +40,7 @@ export const documents = pgTable("documents", {
 
 export const documentChunks = pgTable("document_chunks", {
   id: uuid("id").primaryKey().defaultRandom().notNull(),
-  documentId: text("metadata").notNull(),
+  metadata: text("metadata").notNull(),
   content: text("content").notNull(),
   embedding: vector("embedding", { dimensions: 768 }),
   createdAt: timestamp("created_at").defaultNow().notNull(),

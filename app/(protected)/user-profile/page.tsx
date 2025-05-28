@@ -19,9 +19,9 @@ import { Skeleton } from "@/app/components/ui/skeleton"
 import { ThemeToggle } from "@/app/components/theme-toggle"
 import { LogOut } from "lucide-react"
 import { signOut } from "@/app/actions/auth"
-import { deleteUserAccount } from "@/app/actions/profile" // Import the new action
-import ConfirmDialog from "@/app/components/ConfirmDialog" // Import ConfirmDialog
-import { useRouter } from "next/navigation" // Import useRouter
+import { deleteUserAccount } from "@/app/actions/profile"
+import ConfirmDialog from "@/app/components/ConfirmDialog"
+import { useRouter } from "next/navigation"
 
 type UserType = {
   id: string
@@ -33,7 +33,7 @@ type UserType = {
 export default function ProfilePage() {
   const [user, setUser] = useState<UserType | null>(null)
   const [loading, setLoading] = useState(true)
-  const [isDeleting, setIsDeleting] = useState(false) // State for delete loading
+  const [isDeleting, setIsDeleting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const router = useRouter()
 
@@ -139,8 +139,8 @@ export default function ProfilePage() {
       const result = await deleteUserAccount()
       if (result.success) {
         toast.success(result.message || "Account deleted successfully.")
-        await signOut() // Sign out user
-        router.push("/login?message=Account+deleted") // Redirect to login
+        await signOut()
+        router.push("/login?message=Account+deleted")
       } else {
         toast.error(result.message || "Failed to delete account.")
       }
@@ -304,7 +304,7 @@ export default function ProfilePage() {
                 <Button
                   variant="destructive"
                   onClick={() => {
-                    setShowDeleteConfirm(true) // Open confirmation dialog
+                    setShowDeleteConfirm(true)
                   }}
                   className="flex gap-2"
                   disabled={isDeleting}
