@@ -1,6 +1,6 @@
 {
-  "id": "fd178140-b641-456d-983d-52036adc0b98",
-  "prevId": "076911d0-3f49-4dd9-916e-79f98022d613",
+  "id": "dc323a31-1096-49d9-9147-93a82d373453",
+  "prevId": "75092a44-ef6a-44d6-a7e9-f3929d5977ca",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -74,71 +74,6 @@
             "id"
           ],
           "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.document_chunks": {
-      "name": "document_chunks",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "document_id": {
-          "name": "document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "chunk_text": {
-          "name": "chunk_text",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "chunk_index": {
-          "name": "chunk_index",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "embeddings": {
-          "name": "embeddings",
-          "type": "vector(768)",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {},
-      "foreignKeys": {
-        "document_chunks_document_id_documents_id_fk": {
-          "name": "document_chunks_document_id_documents_id_fk",
-          "tableFrom": "document_chunks",
-          "tableTo": "documents",
-          "columnsFrom": [
-            "document_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },

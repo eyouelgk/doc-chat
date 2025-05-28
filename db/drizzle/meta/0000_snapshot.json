@@ -1,5 +1,5 @@
 {
-  "id": "076911d0-3f49-4dd9-916e-79f98022d613",
+  "id": "75092a44-ef6a-44d6-a7e9-f3929d5977ca",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -94,26 +94,20 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "document_id": {
-          "name": "document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "chunk_text": {
-          "name": "chunk_text",
+        "metadata": {
+          "name": "metadata",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "chunk_index": {
-          "name": "chunk_index",
-          "type": "integer",
+        "content": {
+          "name": "content",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "embeddings": {
-          "name": "embeddings",
+        "embedding": {
+          "name": "embedding",
           "type": "vector(768)",
           "primaryKey": false,
           "notNull": false
@@ -127,21 +121,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "document_chunks_document_id_documents_id_fk": {
-          "name": "document_chunks_document_id_documents_id_fk",
-          "tableFrom": "document_chunks",
-          "tableTo": "documents",
-          "columnsFrom": [
-            "document_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -316,6 +296,14 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
+        },
+        "role": {
+          "name": "role",
+          "type": "message_role",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'user'"
         }
       },
       "indexes": {},

@@ -1,6 +1,6 @@
 {
-  "id": "e8279bb8-43ba-4d2a-b09b-801b04ed859e",
-  "prevId": "fd178140-b641-456d-983d-52036adc0b98",
+  "id": "3b447980-4308-4238-a634-e9f23948d930",
+  "prevId": "dc323a31-1096-49d9-9147-93a82d373453",
   "version": "7",
   "dialect": "postgresql",
   "tables": {
@@ -94,21 +94,15 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
-        "document_id": {
-          "name": "document_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "chunk_text": {
-          "name": "chunk_text",
+        "metadata": {
+          "name": "metadata",
           "type": "text",
           "primaryKey": false,
           "notNull": true
         },
-        "chunk_index": {
-          "name": "chunk_index",
-          "type": "integer",
+        "content": {
+          "name": "content",
+          "type": "text",
           "primaryKey": false,
           "notNull": true
         },
@@ -127,21 +121,7 @@
         }
       },
       "indexes": {},
-      "foreignKeys": {
-        "document_chunks_document_id_documents_id_fk": {
-          "name": "document_chunks_document_id_documents_id_fk",
-          "tableFrom": "document_chunks",
-          "tableTo": "documents",
-          "columnsFrom": [
-            "document_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        }
-      },
+      "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},

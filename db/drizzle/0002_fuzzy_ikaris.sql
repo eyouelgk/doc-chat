@@ -1,1 +1,0 @@
-ALTER TABLE "document_chunks" RENAME COLUMN "embeddings" TO "embedding";
