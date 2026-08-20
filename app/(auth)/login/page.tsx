@@ -65,7 +65,7 @@ export default function SignInPage() {
           <h1 className="text-3xl font-bold text-foreground">DocChat</h1>
         </div>
         <h2 className="text-center text-2xl font-semibold text-foreground">
-          Sign in to your account
+     hello world
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           Chat with your documents using AI
